@@ -1,5 +1,5 @@
 /* R24: purchase operation prototypes. All records are session-only. */
-const BUILD_R24='R31';
+const BUILD_R24='R32';
 let purchaseFlowR24=null;
 const purchaseNoteR24='<p class="muted">Simulação com dados fictícios. Nenhuma ordem, comunicação ou documento fiscal real é enviado.</p>';
 const purchaseItemsR24=x=>(x.items?.length?x.items:[{description:x.description,qty:1,unit:x.amount}]).map(i=>({...i}));

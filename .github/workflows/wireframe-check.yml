@@ -49,7 +49,7 @@ jobs:
                 const selector='button[data-action='+JSON.stringify(a)+']';
                 const inside=page.locator('dialog[open] '+selector).filter({visible:true}).last();
                 if(await inside.count())return inside.click({timeout:5000});
-                if(!await visible(selector).count()){const hidden=page.locator('.operation-overflow-r31:not([open])').filter({has:page.locator(selector)}).first();if(await hidden.count())await hidden.locator('summary').click({timeout:5000})}
+                if(!await visible(selector).count()){const support=page.locator('.content [data-mobile-support]').filter({has:page.locator(selector)}).first();const self=page.locator('.content [data-mobile-support]'+selector).first();const key=await support.count()?await support.getAttribute('data-mobile-support'):await self.count()?await self.getAttribute('data-mobile-support'):null;if(key)await visible('button[data-action="support-r32:'+key+'"]').click({timeout:5000});}if(!await visible(selector).count()){const hidden=page.locator('.operation-overflow-r31:not([open])').filter({has:page.locator(selector)}).first();if(await hidden.count())await hidden.locator('summary').click({timeout:5000})}
                 return visible(selector).click({timeout:5000});
               };
               const assert=(c,m)=>{if(!c)throw Error(m)};
@@ -487,7 +487,7 @@ jobs:
                 }
               });
               await test('64-budget-stage-totals',async()=>{
-                await page.evaluate(()=>go('budgets'));assert(await page.locator('.budget-overview-r21').isVisible(),'Consolidado ausente');
+                await page.evaluate(()=>go('budgets'));if(width===390){await click('support-r32:summary');assert(await page.locator('.budget-overview-r21').isVisible(),'Consolidado ausente');await click('support-close-r32')}else assert(await page.locator('.budget-overview-r21').isVisible(),'Consolidado ausente');
                 await click('edit:OR-012');assert(await page.locator('#stage-totals-r21 .stage-share').count()===2,'Composição por etapa ausente');
                 await click('close');
               });
@@ -614,18 +614,32 @@ jobs:
               });
               await test('81-compact-finance-mobile',async()=>{
                 await page.evaluate(()=>go('finance-payments'));
-                if(width===390){const b=await page.locator('.finance-overview').boundingBox();assert(b&&b.height<235,'Resumo financeiro ocupa espaço excessivo: '+JSON.stringify(b));}
+                if(width===390){assert(!await page.locator('.finance-overview').isVisible(),'Resumo deve estar na janela de apoio');await click('support-r32:summary');assert(await page.locator('#support-r32 .finance-overview').isVisible(),'Resumo inacessível');await page.screenshot({path:'evidence/81-summary-sheet.png',animations:'disabled'});await click('support-close-r32');}
                 await page.screenshot({path:'evidence/81-compact-finance.png',animations:'disabled'});
               });
               await test('82-adaptive-operation-menu',async()=>{
                 await page.evaluate(()=>go('finance-payments'));
                 const d=page.locator('.operation-toolbar-r26 .operation-overflow-r31');
                 assert(await d.count()===1,'Menu de operações ausente');
-                if(width===390){assert(await d.getAttribute('open')===null,'Menu deveria iniciar recolhido');await d.locator('summary').click();assert(await d.locator('[data-action="finance-batch"]').isVisible(),'Operação secundária inacessível');await page.screenshot({path:'evidence/82-operations-open.png',animations:'disabled'});await page.keyboard.press('Escape');assert(await d.getAttribute('open')===null,'Escape não fechou menu');}
+                if(width===390){assert(!await d.isVisible(),'Operações devem ficar recolhidas');await click('support-r32:operations');assert(await page.locator('#support-r32 [data-action="finance-batch"]').isVisible(),'Operação secundária inacessível');await page.screenshot({path:'evidence/82-operations-open.png',animations:'disabled'});await page.keyboard.press('Escape');assert(!await page.locator('#support-r32').isVisible(),'Escape não fechou painel');}
               });
               await test('83-semantic-bank-summary',async()=>{
                 await page.evaluate(()=>go('finance-banks'));
                 assert(await page.locator('.semantic-summary-r31').innerText().then(t=>t.includes('Saldo registrado')&&t.includes('Contas ativas')&&!t.includes('Em aberto')),'Resumo bancário inadequado');
+              });
+              await test('84-mobile-workspace-support',async()=>{
+                await page.evaluate(()=>go('finance-payments'));
+                if(width===390){
+                  const first=page.locator('.recordcard:visible').first(),b=await first.boundingBox(),m=await page.locator('.main').boundingBox();
+                  assert(b&&m&&b.y+Math.min(100,b.height)<=m.y+m.height,'Primeiro registro fora da área útil');
+                  await click('support-r32:filters');assert(await page.locator('#support-r32 #status-filter').isVisible(),'Filtro inacessível');
+                  await page.locator('#status-filter').selectOption('Vencido');await click('support-close-r32');
+                  assert(await page.locator('.recordcard:visible').count()===1,'Filtro por situação não aplicado');
+                  assert(await page.locator('[data-action="support-r32:filters"]').innerText().then(t=>t.includes('1')),'Filtro ativo não indicado');
+                  await page.screenshot({path:'evidence/84-mobile-filtered.png',animations:'disabled'});
+                  await click('support-r32:filters');await page.locator('#status-filter').selectOption('');await click('support-close-r32');
+                  await click('support-r32:operations');await click('finance-plan');assert(!await page.locator('#support-r32').isVisible(),'Painel de apoio não fechou antes da operação');assert(await page.locator('#dialog').isVisible(),'Operação não abriu');await click('close');
+                }else assert(await page.locator('.finance-overview').isVisible(),'Desktop perdeu resumo');
               });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
