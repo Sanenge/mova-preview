@@ -142,14 +142,23 @@
       "implemented": [
         "record detail tabs",
         "comments",
-        "attachment metadata"
+        "attachment metadata",
+        "visible operations on each purchasing page",
+        "order wizard with quote/request/standalone origins",
+        "quote creation and supplier selection",
+        "editable proposal totals and award",
+        "per-item approval",
+        "receipt and return entry dialogs",
+        "sample XML review and fiscal decision"
       ],
       "remaining": [
-        "order wizard",
-        "supplier proposals and comparative award",
-        "receiving and returns",
-        "fiscal XML review",
-        "per-item approval"
+        "item-level quotation matrix with split awards",
+        "supplier invitations and portal",
+        "order approval issuance and supplier confirmation",
+        "billing and delivery settings",
+        "realistic receipt quantities and stock links",
+        "XML parsing not implemented (example only)",
+        "document export and detail parity"
       ]
     },
     {
