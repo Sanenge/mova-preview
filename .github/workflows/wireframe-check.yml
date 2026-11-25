@@ -209,7 +209,7 @@ jobs:
               });
               await test('29-visual-dashboard',async()=>{
                 await click('go:dashboard');
-                assert(await page.locator('.overview-grid .sparkline').count()===3,'Indicadores visuais incompletos');
+                assert(await page.locator('.overview-grid .amount-progress-r29').count()===2,'Indicadores de regularização incompletos');
                 assert(await page.locator('.donut-legend>div').count()===3,'Distribuição financeira ausente');
                 assert(await page.locator('.recent-list .recent-item').count()>0,'Movimentos recentes ausentes');
                 if(width===390){
@@ -603,6 +603,18 @@ jobs:
                 await click('close');
                 assert(await page.locator('.budget-page-r29').isVisible(),'Retorno ao orçamento perdido');
                 await click('go:budgets');
+              });
+              await test('80-compact-item-dialog',async()=>{
+                await page.evaluate(()=>go('purchase-requests'));await click('edit:SC-032');await click('add-item');
+                const b=await page.locator('.item-modal-r28').boundingBox();
+                if(width===1440)assert(b&&b.height<600,'Editor de item muito alto: '+JSON.stringify(b));
+                await page.screenshot({path:'evidence/80-compact-item-dialog-open.png',animations:'disabled'});
+                await page.locator('.item-modal-r28 .dialogfooter [data-item-action=cancel]').click();await click('close');
+              });
+              await test('81-compact-finance-mobile',async()=>{
+                await page.evaluate(()=>go('finance-payments'));
+                if(width===390){const b=await page.locator('.finance-overview').boundingBox();assert(b&&b.height<235,'Resumo financeiro ocupa espaço excessivo: '+JSON.stringify(b));}
+                await page.screenshot({path:'evidence/81-compact-finance.png',animations:'disabled'});
               });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){

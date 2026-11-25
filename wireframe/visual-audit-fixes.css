@@ -1,0 +1,26 @@
+/* R30 — corrections grounded in real R29 Chromium screenshots. */
+@media(min-width:801px){
+ .dialog.item-modal-r28[open],#dialog[data-mode=summary][open],#dialog[data-mode=operation][open],#dialog[data-mode=decision][open]{height:fit-content!important;min-height:0!important;max-height:calc(100dvh - 48px)!important;margin:auto;inset:0}
+ .dialog.item-modal-r28[open] .dialogbody,#dialog[data-mode=summary][open] .dialogbody,#dialog[data-mode=operation][open] .dialogbody,#dialog[data-mode=decision][open] .dialogbody{flex:0 1 auto!important;min-height:0;max-height:calc(100dvh - 180px);overflow:auto}
+ .dialog.item-modal-r28[open] .dialogfooter,#dialog[data-mode=summary][open] .dialogfooter{margin-top:0;flex:0 0 auto}
+ .dialog.item-modal-r28[open] .dialoghead{padding:20px 24px 8px}
+ .dialog.item-modal-r28[open] .dialogbody{padding:14px 24px 8px}
+ .dialog.item-modal-r28[open] .dialogfooter{padding:16px 24px 20px}
+}
+.experience-chat .conversation .avatar,.experience-chat .threadhead .avatar,.experience-chat .message-avatar{display:grid;place-items:center;align-self:center;line-height:1;flex:none;font-weight:500}
+.experience-chat .conversation .avatar{border-radius:50%;width:42px;height:42px;min-width:42px;background:var(--sub);color:var(--muted)}
+.experience-chat .conversation.active .avatar{background:var(--surface);color:var(--accent)}
+.experience-chat .conversation{min-height:68px;padding:9px 10px;gap:10px}
+.experience-chat .conversation .copy{min-width:0}.experience-chat .conversation .copy strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25;font-weight:500}.experience-chat .conversation .preview{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13px;color:var(--muted)}
+.experience-chat .threadbody{gap:10px}.experience-chat .message-row{gap:8px}.experience-chat .bubble{padding:10px 14px;max-width:min(82%,570px)}.experience-chat .message-meta{font-size:12px}.experience-chat .chat-date{padding:2px 8px;background:transparent}
+@media(max-width:800px){
+ .pagehead{margin-bottom:12px}.pagehead h1{font-size:30px}.tabbar{margin-bottom:12px}.tabbar button{min-height:40px}
+ .finance-overview{gap:10px;padding:14px 16px;margin-bottom:12px;border-radius:20px}
+ .finance-total{gap:3px}.finance-total>.metric{font-size:29px;letter-spacing:-.8px}.finance-total>.muted:first-child{font-size:13px}.finance-total>.muted:last-child{display:none}
+ .finance-breakdown{gap:7px}.finance-breakdown-head{gap:10px}.finance-breakdown-head>div{gap:2px}.finance-breakdown-head .muted{font-size:13px}.finance-breakdown-head .metric{font-size:clamp(15px,4.6vw,19px)}.finance-composition{height:8px}.finance-legend{gap:7px;font-size:11px}
+ .collection-workspace-r29{margin-top:12px}.collection-workspace-r29 .collectionhead{margin:0 0 8px}.collection-workspace-r29 .collectionhead h2{font-size:18px}.collection-workspace-r29 .toolbar{gap:6px;margin:8px 0}.collection-workspace-r29 .toolbar .search,.collection-workspace-r29 .toolbar .filter,.collection-workspace-r29 .toolbar .iconbtn{min-height:44px}.collection-workspace-r29 .operation-toolbar-r26,.collection-workspace-r29 .wh-toolbar{margin-block:6px;gap:5px}.collection-workspace-r29 .operation-toolbar-r26 button,.collection-workspace-r29 .wh-toolbar button{min-height:44px}
+ .overview-r29{gap:14px 12px!important;padding:16px}.experience-dashboard .overview-r29>.balancefeature{gap:7px}.overview-r29 .balancevalue{font-size:33px}.overview-r29 .balancebottom{gap:4px}.overview-r29 .metric-heading{min-height:32px}.overview-r29 .amount-link-r29{min-height:44px}
+ .dialog.item-modal-r28[open]{height:fit-content!important;min-height:0!important;max-height:calc(100dvh - 32px)!important}.dialog.item-modal-r28[open] .dialogbody{flex:0 1 auto!important;max-height:calc(100dvh - 170px)}
+ .experience-chat .bubble{max-width:86%;padding:9px 12px}.experience-chat .threadbody{gap:10px}.experience-chat .conversation .avatar{width:42px;height:42px;min-width:42px}
+}
+@media(prefers-reduced-motion:no-preference){.experience-chat .conversation,.experience-chat .bubble{transition:background-color 140ms ease,transform 140ms ease}.experience-chat .conversation:active{transform:scale(.99)}}
