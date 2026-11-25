@@ -461,6 +461,19 @@ jobs:
                 assert(await page.locator('#dialog .operation-value').count()===1,'Valor ausente ou duplicado');
                 await click('close');
               });
+              await test('61-notification-center',async()=>{
+                await page.evaluate(()=>go('dashboard'));await click('notifications');
+                assert(await page.locator('#notification-list .notification-item').count()>0,'Notificações ausentes');
+                await click('notification-filter:unread');await click('notifications-read-all');
+                assert(await page.locator('#notification-list .empty-state-r20').isVisible(),'Estado vazio ausente');
+                await click('notification-filter:all');
+                assert(await page.locator('#notification-list .notification-item.unread').count()===0,'Notificações não atualizadas');await click('close');
+              });
+              await test('62-empty-list',async()=>{
+                await page.evaluate(()=>go('finance-payments'));await page.locator('#list-search').fill('inexistente-xxx');
+                assert(await page.locator('#list-results .empty-state-r20').isVisible(),'Estado vazio da pesquisa ausente');
+                await click('clear');assert(await page.locator('.recordcard,.tablewrap tbody tr').count()>0,'Limpeza não restaurou registros');
+              });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
