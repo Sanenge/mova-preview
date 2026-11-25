@@ -496,9 +496,9 @@ jobs:
               });
               await test('66-record-detail',async()=>{
                 await page.evaluate(()=>go('purchase-requests'));await click('view:SC-032');await click('record-detail:SC-032');
-                await click('detail-tab:Comentários');await page.locator('#f-detailComment').fill('Revisado');await click('detail-comment');
+                assert(await page.locator('.purchase-detail-page-r25').isVisible(),'Acompanhamento duplicado como modal');await click('purchase-page-tab:Comentários');await page.locator('#f-detailComment').fill('Revisado');await click('detail-comment');
                 assert(await page.locator('.detail-comment').innerText().then(x=>x.includes('Revisado')),'Comentário não registrado');
-                await click('detail-tab:Documentos');assert(await page.locator('#detail-upload-r22').count()===1,'Anexo ausente');await click('close');
+                await click('purchase-page-tab:Documentos');assert(await page.locator('#detail-upload-r22').count()===1,'Anexo ausente');
                 await page.evaluate(()=>go('finance-payments'));await click('view:CP-1043');await click('record-detail:CP-1043');await click('detail-tab:Classificação');
                 assert(await page.locator('.detail-rows-r22').isVisible(),'Dossiê ausente');await click('close');
               });
@@ -551,6 +551,18 @@ jobs:
                 const bounds=await page.evaluate(()=>{const r=s=>document.querySelector(s).getBoundingClientRect();return {d:r('#dialog').toJSON(),h:r('#dialog .dialoghead').toJSON(),f:r('#dialog .dialogfooter').toJSON()}});
                 assert(bounds.h.top>=bounds.d.top-2&&bounds.f.bottom<=bounds.d.bottom+2,'Cabeçalho ou rodapé saiu da janela');
                 await click('close');
+              });
+              await test('76-page-architecture',async()=>{
+                await page.evaluate(()=>go('dashboard'));
+                assert(await page.locator('.release-panel-r24').count()===0,'Painel contém bloco de divulgação da versão');
+                await page.evaluate(()=>go('purchase-requests'));
+                assert(await page.locator('.operation-toolbar-r26').count()===1,'Barra de operações ausente ou duplicada');
+                assert(await page.locator('.operation-workspace-r24').count()===0,'Atalhos em cartões empurram registros');
+                const position=await page.locator('#list-results').boundingBox();
+                assert(position&&position.y<850,'Registros deslocados para baixo: '+JSON.stringify(position));
+                await click('view:SC-032');assert(await page.locator('#dialog [data-action="record-detail:SC-032"]').count()===1,'Acompanhamento duplicado');
+                await click('record-detail:SC-032');assert(await page.locator('.purchase-detail-page-r25').isVisible(),'Resumo não conduz à página');
+                await page.screenshot({path:'evidence/76-acompanhamento.png'});
               });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){

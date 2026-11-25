@@ -1,16 +1,9 @@
 /* R24: purchase operation prototypes. All records are session-only. */
-const BUILD_R24='R25';
+const BUILD_R24='R26';
 let purchaseFlowR24=null;
 const purchaseNoteR24='<p class="muted">Simulação com dados fictícios. Nenhuma ordem, comunicação ou documento fiscal real é enviado.</p>';
 const purchaseItemsR24=x=>(x.items?.length?x.items:[{description:x.description,qty:1,unit:x.amount}]).map(i=>({...i}));
 const purchaseSuppliersR24=()=>[...new Set([...records.suppliers.map(x=>x.party),'Distribuidora Alfa','Comercial Sul'])];
-function purchaseToolsR24(){if(!route.startsWith('purchase-'))return '';let a=[];
- if(route==='purchase-requests')a=[['Criar cotação','cart','purchase-quote-start'],['Nova ordem','plus','purchase-wizard'],['Aprovar itens','check','purchase-pick:approval']];
- if(route==='purchase-quotes')a=[['Criar cotação','plus','purchase-quote-start'],['Mapa comparativo','chart','purchase-pick:map'],['Gerar ordem','cart','purchase-wizard']];
- if(route==='purchase-orders')a=[['Nova ordem por origem','plus','purchase-wizard'],['Registrar recebimento','box','purchase-pick:receipt'],['Registrar devolução','arrow','purchase-pick:return']];
- if(route==='purchase-invoices')a=[['Importar XML','file','purchase-xml'],['Conferir nota fiscal','check','purchase-pick:invoice']];
- return '<section class="operation-workspace-r24"><h2>Operações de '+esc(routes[route].title.toLowerCase())+'</h2><div class="operation-grid-r24">'+a.map(([label,icon,action])=>'<button class="operation-link-r24" data-action="'+action+'"><span class="metric-icon">'+ic(icon)+'</span><strong>'+label+'</strong>'+ic('chevron')+'</button>').join('')+'</div></section>'
-}
 function purchaseRecordToolsR24(id){if(!route.startsWith('purchase-'))return '';let a=[];
  if(route==='purchase-requests')a=[['Aprovar itens','purchase-approval:'+id]];
  if(route==='purchase-quotes')a=[['Mapa comparativo','purchase-map:'+id]];
@@ -40,5 +33,16 @@ function purchaseXmlSaveR24(){const f=$('#purchase-xml-review-r24');if(!f||!vali
 function purchaseInvoiceR24(id){const x=records['purchase-invoices'].find(x=>x.id===id);if(!x)return;purchaseFlowR24={kind:'invoice',id};purchaseDialogR24('Conferência fiscal','<div class="summary-value"><span>'+esc(x.party)+'</span><strong>'+money(x.amount)+'</strong></div>'+rowsR22([['Documento',x.description],['Ordem',x.orderRef],['Situação',x.status]])+'<div class="operation-checks-r24"><label><input type="checkbox" id="invoice-check-r24"> Conferi os dados demonstrativos</label></div>',btn('Rejeitar','close','purchase-invoice-state:Rejeitado')+btn('Conferir','check','purchase-invoice-state:Conferido','primary'))}
 function purchaseInvoiceStateR24(next){const x=records['purchase-invoices'].find(x=>x.id===purchaseFlowR24?.id);if(!x||!['Rejeitado','Conferido'].includes(next))return;if(next==='Conferido'&&!$('#invoice-check-r24')?.checked){toast('Confirme a conferência dos dados');return}ledgerHistoryR23(x,next,'Conferência fiscal demonstrativa');closeDialog();renderPreservingView();toast('Situação atualizada','success',x.id)}
 function purchaseMovementDetailR24(x,t){const rows=(x.demoMovements||[]).filter(m=>m.kind===(t==='Recebimentos'?'receipt':'return'));return rows.length?rows.map(m=>rowsR22([['Data',date(m.date)],['Responsável',m.responsible],['Local',m.location],['Itens',m.items.map(i=>i.description+' × '+i.qty).join('; ')],['Observações',m.reason]])).join(''):emptyStateR20('Nenhum movimento registrado','Utilize a operação para registrar uma movimentação.')}
-function visibleFinanceToolsR24(){if(!['finance-payments','finance-receipts','finance-payment-plans','finance-reconciliation','finance-entries'].includes(route))return '';const a=route==='finance-reconciliation'?[['Importar extrato','file','finance-import']]:route==='finance-payment-plans'?[['Programar pagamentos','calendar','finance-plan']]:[['Programar pagamentos','calendar','finance-plan'],['Baixas em lote','check','finance-batch'],['Posição de vencimentos','chart','finance-aging'],['Exportar CSV','file','finance-export']];return '<section class="operation-workspace-r24"><h2>Operações financeiras</h2><div class="operation-grid-r24">'+a.map(([l,i,k])=>'<button class="operation-link-r24" data-action="'+k+'"><span class="metric-icon">'+ic(i)+'</span><strong>'+l+'</strong>'+ic('chevron')+'</button>').join('')+'</div></section>'}
-function releasePanelR24(){return '<section class="release-panel-r24"><div><h2>Wireframe '+BUILD_R24+'</h2><p class="muted">Construção funcional · confira as novas operações</p></div><div class="release-links-r24">'+btn('Financeiro','wallet','go:finance-payments')+btn('Compras','cart','go:purchase-requests')+btn('Ordens de compra','file','go:purchase-orders')+btn('Notas fiscais','file','go:purchase-invoices')+'</div></section>'}
+/* R26: single contextual toolbar. */
+const operationRegistryR26=Object.freeze({
+ 'finance-payments':[['Programar pagamentos','calendar','finance-plan'],['Baixas em lote','check','finance-batch'],['Vencimentos','chart','finance-aging'],['Exportar','file','finance-export']],
+ 'finance-receipts':[['Baixas em lote','check','finance-batch'],['Vencimentos','chart','finance-aging'],['Exportar','file','finance-export']],
+ 'finance-entries':[['Programar pagamentos','calendar','finance-plan'],['Baixas em lote','check','finance-batch'],['Vencimentos','chart','finance-aging'],['Exportar','file','finance-export']],
+ 'finance-payment-plans':[['Programar pagamentos','calendar','finance-plan']],
+ 'finance-reconciliation':[['Importar extrato','file','finance-import']],
+ 'purchase-requests':[['Criar cotação','cart','purchase-quote-start'],['Nova ordem','plus','purchase-wizard'],['Aprovar itens','check','purchase-pick:approval']],
+ 'purchase-quotes':[['Criar cotação','plus','purchase-quote-start'],['Mapa comparativo','chart','purchase-pick:map'],['Gerar ordem','cart','purchase-wizard']],
+ 'purchase-orders':[['Nova ordem por origem','plus','purchase-wizard'],['Registrar recebimento','box','purchase-pick:receipt'],['Registrar devolução','arrow','purchase-pick:return']],
+ 'purchase-invoices':[['Importar XML','file','purchase-xml'],['Conferir nota fiscal','check','purchase-pick:invoice']]
+});
+function operationToolbarR26(){const actions=operationRegistryR26[route];if(!actions)return '';return '<div class="operation-toolbar-r26" role="group" aria-label="Operações disponíveis">'+actions.map(([l,i,k])=>btn(l,i,k,'ghost')).join('')+'</div>'}

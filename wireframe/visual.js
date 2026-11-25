@@ -7,7 +7,7 @@ const VisualR09=Object.freeze({
 function visualPurchaseNav(){
  return '<nav class="purchase-flow" aria-label="Etapas de compras">'+VisualR09.purchaseStages.map(([id,label,icon],i)=>{
  const data=records[id]||[],active=id===route,open=data.filter(x=>['Pendente','Aberto','Em revisão'].includes(x.status)).length;
- return '<button class="purchase-step '+(active?'active':'')+'" data-action="go:'+id+'" '+(active?'aria-current="page"':'')+'><span class="flow-icon">'+ic(icon)+'</span><span class="flow-copy"><strong>'+esc(label)+'</strong><span>'+data.length+' registros · '+open+' pend.</span></span><span class="flow-count">'+(i+1)+'</span></button>'
+ return '<button class="purchase-step '+(active?'active':'')+'" data-action="go:'+id+'" '+(active?'aria-current="page"':'')+'><span class="flow-icon">'+ic(icon)+'</span><span class="flow-copy"><strong>'+esc(label)+'</strong></span><span class="flow-count">'+(i+1)+'</span></button>'
  }).join('')+'</nav>'
 }
 function purchaseOverview(data){
