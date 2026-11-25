@@ -44,22 +44,24 @@ jobs:
               if(!response?.ok())throw Error('HTTP '+response?.status());
               await page.waitForFunction(()=>typeof Registry!=='undefined'&&typeof Store!=='undefined'&&typeof App!=='undefined',{},{timeout:45000});
               const demo=page.getByRole('button',{name:'Explorar o Mova de demonstração',exact:true});
-              if(await demo.isVisible()){
-                await page.screenshot({path:'audit/00-login.png',animations:'disabled'});
-                await demo.click({timeout:10000});
-                await demo.waitFor({state:'hidden',timeout:15000});
-              }
-              await page.waitForFunction(()=>!document.querySelector('#authPortalHost')?.innerText?.includes('Acesse sua conta') || !document.querySelector('#authPortalHost')?.getClientRects().length,{},{timeout:15000}).catch(()=>{});
-              await page.waitForTimeout(3200);
+              // Each worker starts with a fresh browser context. Wait for the
+              // asynchronous auth portal, not just the underlying app shell.
+              await demo.waitFor({state:'visible',timeout:45000});
+              await page.screenshot({path:'audit/00-login.png',animations:'disabled'});
+              await demo.click({timeout:15000});
+              await demo.waitFor({state:'hidden',timeout:20000});
+              await page.waitForFunction(()=>document.querySelector('#authPortalHost')?.getAttribute('aria-hidden')==='true',{},{timeout:20000});
+              await page.getByRole('button',{name:'Painel',exact:true}).filter({visible:true}).first().waitFor({timeout:15000});
               if(await page.evaluate(()=>document.documentElement.dataset.theme)!==theme){
-                const toggle=page.locator('[data-theme-toggle]').filter({visible:true}).first();
-                if(await toggle.count())await toggle.click({timeout:3500});
+                const toggles=page.getByRole('button',{name:'Alterar tema',exact:true}).filter({visible:true});
+                if(await toggles.count())await toggles.first().click({timeout:5000});
                 else{
                   const profile=page.locator('[data-profile-menu-toggle]').filter({visible:true}).first();
-                  if(await profile.count())await profile.click({timeout:3500});
-                  const visibleToggle=page.locator('[data-theme-toggle]').filter({visible:true}).first();
-                  if(await visibleToggle.count())await visibleToggle.click({timeout:3500});
+                  if(await profile.count())await profile.click({timeout:5000});
+                  const alternate=page.getByRole('button',{name:'Alternar tema claro/escuro',exact:true}).filter({visible:true}).first();
+                  if(await alternate.count())await alternate.click({timeout:5000});
                 }
+                await page.waitForFunction(t=>document.documentElement.dataset.theme===t,theme,{timeout:6000});
               }
               const routes=await page.evaluate(()=>Object.entries(Registry.routes).map(([id,r])=>({id,title:r.title,module:r.module,hidden:!!(r.hidden||r.menuHidden)})));
               console.log('REGISTERED '+routes.length);
@@ -70,7 +72,7 @@ jobs:
                 try{
                   if(await page.evaluate(()=>document.body.dataset.route)!==route.id){
                     const control=page.locator('[data-route='+JSON.stringify(route.id)+']');
-                    if(await control.count()===0)throw Error('Sem controle de rota no DOM atual');
+                    if(await control.count()===0){item.blocker='route-control-missing';throw Error('Sem controle de rota no DOM atual');}
                     // Dispatch through the installed application event bridge; this is
                     // route-render coverage, not a physical click usability test.
                     await control.first().dispatchEvent('click');
@@ -82,9 +84,10 @@ jobs:
                     const vis=e=>!!e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden';
                     return {actualRoute:document.body.dataset.route,rendered:!!root&&root.textContent.trim().length>10,heading:root?.querySelector('h1,h2')?.textContent?.trim()||'',overflow:Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth),actualTheme:document.documentElement.dataset.theme,inputs:root?[...root.querySelectorAll('input,select,textarea')].filter(vis).length:0,actions:root?[...root.querySelectorAll('button:not([disabled])')].filter(vis).length:0};
                   }));
-                  if(await demo.isVisible())throw Error('Login visivel');
+                  if(await page.locator('#authPortalHost[aria-hidden="false"]').count())throw Error('Login visivel');
                   if(!item.rendered)throw Error('Conteudo nao renderizado');
                   await page.screenshot({path:'audit/'+safe(route.id)+'.png',animations:'disabled',timeout:10000});
+                  item.captured=true;
                   item.ok=item.actualRoute===route.id&&item.actualTheme===theme&&item.overflow<=2&&errors.length===before;
                 }catch(e){item.error=String(e.message).slice(0,600)}
                 item.errors=errors.slice(before);
@@ -94,7 +97,7 @@ jobs:
             }catch(e){startupError=String(e.message).slice(0,1000);console.error(startupError)}
             finally{
               if(browser)await browser.close();
-              const summary={width,theme,registered:rows.length,passed:rows.filter(r=>r.ok).length,rendered:rows.filter(r=>r.rendered).length,overflow:rows.filter(r=>r.overflow>2).length,startupError,errors};
+              const summary={width,theme,registered:rows.length,passed:rows.filter(r=>r.ok).length,captured:rows.filter(r=>r.captured).length,missingControl:rows.filter(r=>r.blocker==='route-control-missing').length,rendered:rows.filter(r=>r.rendered).length,overflow:rows.filter(r=>r.overflow>2).length,startupError,errors};
               fs.writeFileSync('audit/report.json',JSON.stringify({summary,rows},null,2));
               console.log('MATRIX '+JSON.stringify(summary));
               if(startupError||!rows.length||summary.passed!==rows.length)process.exitCode=1;
