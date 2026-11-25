@@ -182,6 +182,28 @@ jobs:
                 assert(await page.locator('#f-amount').inputValue()==='0.00','Valor residual após remover item');
                 await click('close');await click('discard');
               });
+              await test('26-domain-approval',async()=>{
+                await click('go:purchase-requests');await click('transition:SC-032');
+                await page.locator('#f-transitionNote').fill('Conferência demonstrativa');
+                await click('transition-confirm:SC-032|Aprovado');
+                await click('view:SC-032');
+                assert(await page.locator('#dialog').innerText().then(x=>x.includes('Pendente → Aprovado')&&x.includes('Conferência demonstrativa')),'Histórico da aprovação ausente');
+                await click('close');
+              });
+              await test('27-finance-canonical',async()=>{
+                await click('go:finance-payments');await click('go:finance-results');await click('go:finance-entries');
+                const shared=await page.evaluate(()=>({entries:records['finance-entries'].length,expected:records['finance-payments'].length+records['finance-receipts'].length,paid:records['finance-entries'].find(x=>x.id==='CP-1042')?.status}));
+                assert(shared.entries===shared.expected&&shared.paid==='Pago','Projeção financeira dessincronizada');
+                await click('edit:CP-1043');
+                assert(await page.locator('#f-planAccount').count()===1,'Classificação financeira ausente');
+                await click('close');
+              });
+              await test('28-domain-form-layout',async()=>{
+                await click('go:finance-payments');await click('edit:CP-1043');
+                assert(await page.locator('#dialog .domain-section').count()===3,'Seções de lançamento ausentes');
+                assert(await page.locator('#f-invoiceFile').count()===1,'Anexo fiscal ausente');
+                await click('close');
+              });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
