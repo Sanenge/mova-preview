@@ -204,6 +204,35 @@ jobs:
                 assert(await page.locator('#f-invoiceFile').count()===1,'Anexo fiscal ausente');
                 await click('close');
               });
+              await test('29-visual-dashboard',async()=>{
+                await click('go:dashboard');
+                assert(await page.locator('.overview-grid .sparkline').count()===3,'Indicadores visuais incompletos');
+                assert(await page.locator('.donut-legend>div').count()===3,'Distribuição financeira ausente');
+                assert(await page.locator('.recent-list .recent-item').count()>0,'Movimentos recentes ausentes');
+                if(width===390){
+                  const b=await page.evaluate(()=>({main:document.querySelector('.main').getBoundingClientRect().bottom,dock:document.querySelector('.pageactions').getBoundingClientRect().top}));
+                  assert(b.main<=b.dock+2,'Animação deslocou a faixa de ações');
+                }
+              });
+              await test('30-task-board',async()=>{
+                await module('task-center');
+                assert(await page.locator('.task-board .board-column').count()===3,'Quadro de tarefas incompleto');
+                await click('view-mode:list');assert(await page.locator('.tablewrap').count()===1,'Lista ausente');
+                await click('view-mode:board');assert(await page.locator('.task-board').count()===1,'Quadro ausente');
+              });
+              await test('31-contact-grid',async()=>{
+                await module('clients');
+                assert(await page.locator('.contact-card').count()>0,'Cards de clientes ausentes');
+                await click('view-mode:list');assert(await page.locator('.tablewrap').count()===1,'Lista de clientes ausente');
+                await click('view-mode:grid');assert(await page.locator('.contacts-grid').count()===1,'Grade ausente');
+              });
+              await test('32-reduced-motion',async()=>{
+                await page.emulateMedia({reducedMotion:'reduce'});
+                await click('go:dashboard');
+                const durations=await page.evaluate(()=>[...document.querySelectorAll('.page-enter,.sparkpath,.bar')].map(el=>getComputedStyle(el).animationDuration));
+                assert(durations.every(v=>v==='0s'),'Movimento reduzido não respeitado');
+                await page.emulateMedia({reducedMotion:'no-preference'});
+              });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
