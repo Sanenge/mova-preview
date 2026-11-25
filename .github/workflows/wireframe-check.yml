@@ -578,7 +578,7 @@ jobs:
                 await page.evaluate(()=>go('budgets'));await click('edit:OR-012');
                 await page.locator('#f-notes').fill('Rascunho preservado');
                 await click('add-item');await page.locator('#f-itemDescription').fill('Item descartado');
-                await page.locator('.item-modal-r28 [data-item-action=cancel]').click();
+                await page.locator('.item-modal-r28 .dialogfooter [data-item-action=cancel]').click();
                 assert(await page.locator('#f-notes').inputValue()==='Rascunho preservado','Rascunho perdido');
                 assert(await page.locator('#item-lines .itemline').count()===3,'Cancelamento alterou itens');
                 await click('item-edit:0');
@@ -588,6 +588,21 @@ jobs:
                 assert(await page.locator('#item-lines .item-stage-r28').count()===2,'Agrupamento de etapas perdido');
                 await page.screenshot({path:'evidence/78-budget-items.png',animations:'disabled'});
                 await click('close');await click('discard');
+              });
+              await test('79-budget-workspace',async()=>{
+                await page.evaluate(()=>go('budgets'));await click('view:OR-012');await click('budget-page:OR-012');
+                assert(await page.locator('.budget-page-r29').isVisible(),'Acompanhamento ausente');
+                assert(await page.locator('.budget-line-r29').count()===3,'Itens não organizados');
+                await page.locator('#budget-search-r29').fill('Execução');
+                assert(await page.locator('.budget-line-r29').count()===1,'Busca por item incorreta');
+                await click('budget-tab:Identificação');assert(await page.locator('#budget-pane-r29').innerText().then(t=>t.includes('Centro de custo')),'Identificação ausente');
+                await click('budget-tab:Itens');await page.locator('#budget-search-r29').fill('');
+                await click('budget-item-edit:1');
+                assert(await page.locator('#f-itemDescription').inputValue()==='Execução de rede','Editor de item incorreto');
+                await page.locator('.item-modal-r28 .dialogfooter [data-item-action=cancel]').click();
+                await click('close');
+                assert(await page.locator('.budget-page-r29').isVisible(),'Retorno ao orçamento perdido');
+                await click('go:budgets');
               });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
