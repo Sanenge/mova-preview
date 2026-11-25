@@ -127,7 +127,7 @@ jobs:
               await page.evaluate(require('axe-core').source);
               const editorViolations=await page.evaluate(async()=>{
                 const a=await axe.run('#dialog',{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});
-                return a.violations.map(v=>({id:v.id,impact:v.impact,count:v.nodes.length}));
+                return a.violations.map(v=>({id:v.id,impact:v.impact,count:v.nodes.length,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}));
               });
               rows.push({name:'axe-editor',violations:editorViolations,ok:editorViolations.length===0});
               await click('close');
@@ -233,6 +233,29 @@ jobs:
                 assert(durations.every(v=>v==='0s'),'Movimento reduzido não respeitado');
                 await page.emulateMedia({reducedMotion:'no-preference'});
               });
+              await test('33-editor-section-navigation',async()=>{
+                await click('go:finance-payments');await click('edit:CP-1043');
+                assert(await page.locator('#dialog .editor-nav button').count()===5,'Índice de seções incompleto');
+                await click('form-section:3');
+                await page.waitForTimeout(550);
+                const pos=await page.evaluate(()=>{const e=document.querySelector('#editor-section-3').getBoundingClientRect(),n=document.querySelector('.editor-nav').getBoundingClientRect();return {top:e.top,nav:n.bottom,bottom:e.bottom}});
+                assert(pos.bottom>pos.nav&&pos.top<pos.nav+150,'Seção não foi localizada');
+                await click('close');
+              });
+              await test('34-record-identity-layout',async()=>{
+                await click('go:finance-payments');
+                const identity=width===390?page.locator('.record-identity').first():page.locator('.table-identity').first();
+                assert(await identity.isVisible(),'Identidade visual do registro ausente');
+                if(width===1440){
+                  const bounds=await page.evaluate(()=>({main:document.querySelector('.main').getBoundingClientRect().right,dock:document.querySelector('.message-dock').getBoundingClientRect().left}));
+                  assert(bounds.main<=bounds.dock+2,'Dock sobreposto ao conteúdo desktop');
+                }
+              });
+              await test('35-segmented-control',async()=>{
+                await module('clients');
+                const bounds=await page.evaluate(()=>[...document.querySelectorAll('.view-switch button')].map(e=>e.getBoundingClientRect().top));
+                assert(bounds.length===2&&Math.abs(bounds[0]-bounds[1])<=2,'Controle de visualização quebrou linha');
+              });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
@@ -247,8 +270,9 @@ jobs:
               }
               await click('go:messages');
               await click('thread:0');
+              await page.waitForTimeout(550);
               await page.evaluate(require('axe-core').source);
-              const violations=await page.evaluate(async()=>{const a=await axe.run({runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});return a.violations.map(v=>({id:v.id,impact:v.impact,count:v.nodes.length}))});
+              const violations=await page.evaluate(async()=>{const a=await axe.run({runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});return a.violations.map(v=>({id:v.id,impact:v.impact,count:v.nodes.length,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))});
               rows.push({name:'axe-messages',violations,ok:violations.length===0});
             }catch(e){rows.push({name:'startup',ok:false,error:e.message})}
             finally{
