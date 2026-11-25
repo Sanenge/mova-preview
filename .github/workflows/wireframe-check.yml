@@ -532,6 +532,26 @@ jobs:
                 await page.evaluate(()=>go('purchase-invoices'));await click('purchase-xml');await click('purchase-xml-review');await click('purchase-xml-save');
                 assert(await page.locator('#list-results').innerText().then(x=>x.includes('NF DEMO 000124')),'Nota fictícia ausente');
               });
+              await test('73-purchase-record-page',async()=>{
+                await page.evaluate(()=>go('purchase-orders'));await click('purchase-page:OC-084');
+                assert(await page.locator('.purchase-detail-page-r25').isVisible(),'Acompanhamento não abriu como página');
+                assert(!await page.locator('#dialog').isVisible(),'Acompanhamento indevidamente modal');
+                await click('purchase-page-tab:Recebimentos');assert(await page.locator('.purchase-page-pane-r25').innerText().then(x=>x.includes('Recebimentos')),'Aba ausente');
+                await click('purchase-page-tab:Conferência');assert(await page.locator('.purchase-page-pane-r25').innerText().then(x=>x.includes('Notas vinculadas')),'Conferência ausente');
+                await click('go:purchase-orders');
+              });
+              await test('74-chart-tooltip',async()=>{
+                await page.evaluate(()=>go('dashboard'));await page.locator('.analysis-target').first().focus();
+                assert(await page.locator('.chart-tooltip-r25').isVisible(),'Tooltip ausente');
+                assert(await page.locator('.chart-tooltip-r25').innerText().then(x=>x.includes('Receitas')&&x.includes('Despesas')),'Rótulos ausentes');
+              });
+              await test('75-dialog-chrome',async()=>{
+                await page.evaluate(()=>go('purchase-requests'));await click('edit:SC-032');
+                await page.locator('#dialog .dialogbody').evaluate(e=>e.scrollTop=e.scrollHeight);
+                const bounds=await page.evaluate(()=>{const r=s=>document.querySelector(s).getBoundingClientRect();return {d:r('#dialog').toJSON(),h:r('#dialog .dialoghead').toJSON(),f:r('#dialog .dialogfooter').toJSON()}});
+                assert(bounds.h.top>=bounds.d.top-2&&bounds.f.bottom<=bounds.d.bottom+2,'Cabeçalho ou rodapé saiu da janela');
+                await click('close');
+              });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
