@@ -474,6 +474,19 @@ jobs:
                 assert(await page.locator('#list-results .empty-state-r20').isVisible(),'Estado vazio da pesquisa ausente');
                 await click('clear');assert(await page.locator('.recordcard,.tablewrap tbody tr').count()>0,'Limpeza não restaurou registros');
               });
+              await test('63-domain-workspaces',async()=>{
+                for(const [id,selector] of [['settings-approvals','.rule-band'],['settings-workflows','.workflow-map'],['settings-automations','.automation-flow'],['document-center','.document-preview-r21'],['contracts','.contract-value-r21']]){
+                  await page.evaluate(id=>go(id),id);
+                  assert(await page.locator(selector).count()>0,'Visualização específica ausente: '+id);
+                  await click('view-mode:list');assert(await page.locator('.tablewrap').count()===1,'Lista alternativa ausente: '+id);
+                  await click('view-mode:'+({ 'settings-approvals':'rules','settings-workflows':'flow','settings-automations':'automations','document-center':'files','contracts':'contracts' }[id]));
+                }
+              });
+              await test('64-budget-stage-totals',async()=>{
+                await page.evaluate(()=>go('budgets'));assert(await page.locator('.budget-overview-r21').isVisible(),'Consolidado ausente');
+                await click('edit:OR-012');assert(await page.locator('#stage-totals-r21 .stage-share').count()===2,'Composição por etapa ausente');
+                await click('close');
+              });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
