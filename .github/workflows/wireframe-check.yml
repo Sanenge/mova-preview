@@ -47,7 +47,7 @@ jobs:
               const visible=(s)=>page.locator(s).filter({visible:true}).first();
               const click=async(a)=>{
                 const selector='button[data-action='+JSON.stringify(a)+']';
-                const inside=page.locator('#dialog[open] '+selector).filter({visible:true}).first();
+                const inside=page.locator('dialog[open] '+selector).filter({visible:true}).last();
                 if(await inside.count())return inside.click({timeout:5000});
                 return visible(selector).click({timeout:5000});
               };
@@ -131,6 +131,57 @@ jobs:
               });
               rows.push({name:'axe-editor',violations:editorViolations,ok:editorViolations.length===0});
               await click('close');
+              await test('20-no-duplicate-primary',async()=>{
+                await click('go:dashboard');
+                assert(await page.locator('#content button[data-action="new-finance"]:visible').count()===1,'Novo lançamento repetido');
+                await click('go:finance-payments');
+                assert(await page.locator('button[data-action="new"]:visible').count()===1,'Criação duplicada');
+                const repeated=await page.evaluate(()=>[...document.querySelectorAll('.tabbar button')].filter(e=>e.getClientRects().length).map(e=>e.dataset.action));
+                assert(new Set(repeated).size===repeated.length,'Abas duplicadas');
+                if(width===390){
+                  const bounds=await page.evaluate(()=>{const main=document.querySelector('.main').getBoundingClientRect(),dock=document.querySelector('.message-dock').getBoundingClientRect(),create=document.querySelector('.pageactions').getBoundingClientRect();return {main:main.bottom,dock:dock.top,create:create.top}});
+                  assert(bounds.main<=Math.min(bounds.dock,bounds.create)+2,'Ações sobrepostas à área de conteúdo');
+                }
+              });
+              await test('21-localized-date-and-status',async()=>{
+                await click('edit:CP-1043');
+                const date=page.locator('#f-date');
+                assert(await date.inputValue()==='28/11/2026','Data fora do formato brasileiro');
+                assert(await page.locator('select[name=status]').count()===0,'Status financeiro editável indevidamente');
+                await date.fill('31/02/2026');await click('save');
+                assert(await page.locator('#dialog').isVisible(),'Data inválida aceita');
+                assert(await date.evaluate(el=>!el.validity.valid),'Validação de data ausente');
+                await date.fill('28/11/2026');
+                await click('close');
+              });
+              await test('22-discard-protection',async()=>{
+                await click('edit:CP-1043');
+                await page.locator('#f-description').fill('Rascunho temporário');
+                await click('close');
+                assert(await page.getByRole('heading',{name:'Descartar alterações?'}).isVisible(),'Descarte sem confirmação');
+                await click('continue-edit');
+                assert(await page.locator('#f-description').inputValue()==='Rascunho temporário','Rascunho perdido');
+                await click('close');await click('discard');
+                assert(!await page.locator('#dialog').isVisible(),'Editor não encerrado');
+                assert(!await page.locator('#list-results').innerText().then(s=>s.includes('Rascunho temporário')),'Rascunho salvo indevidamente');
+              });
+              await test('23-menu-no-repetition',async()=>{
+                await click('record-more:CP-1042');
+                assert(await page.locator('#dialog button[data-action^="view:"]').count()===0,'Ver repetido no menu');
+                assert(await page.locator('#dialog button[data-action^="edit:"]').count()===0,'Editar repetido no menu');
+                await click('close');
+              });
+              await test('24-audit-readonly',async()=>{
+                await module('settings-home');await click('go:audit');
+                assert(await page.locator('#content button[data-action="new"]').count()===0,'Auditoria permite criar');
+                assert(await page.locator('#content button[data-action^="edit:"]').count()===0,'Auditoria permite editar');
+              });
+              await test('25-item-removal',async()=>{
+                await click('go:purchase-requests');await click('edit:SC-032');
+                await page.locator('#item-lines .itemline button[data-action="remove-item"]').first().click();
+                assert(await page.locator('#f-amount').inputValue()==='0.00','Valor residual após remover item');
+                await click('close');await click('discard');
+              });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
