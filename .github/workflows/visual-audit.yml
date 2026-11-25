@@ -1,0 +1,130 @@
+name: MOVA - auditoria visual experimental
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - .github/workflows/visual-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mova-visual-audit
+  cancel-in-progress: true
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Install Playwright
+        run: |
+          npm install --no-audit --no-fund --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Capture public demo
+        env:
+          MOVA_URL: https://sanenge.github.io/mova-preview/
+        run: |
+          mkdir -p audit
+          cat > audit.cjs <<'JS'
+          const {chromium} = require('playwright');
+          const fs = require('node:fs');
+          const targets = [
+            {name:'Painel'},
+            {name:'Financeiro',child:'Contas a pagar'},
+            {name:'Financeiro',child:'Contas a receber'},
+            {name:'Financeiro',child:'Fluxo de caixa'},
+            {name:'Compras',child:'Solicitações'},
+            {name:'Compras',child:'Cotações'},
+            {name:'Compras',child:'Ordens de compra'},
+            {name:'Orçamentos'},
+            {name:'Estoque',child:'Catálogo'},
+            {name:'Cadastros',child:'Clientes'},
+            {name:'Central de Tarefas'},
+            {name:'Mensagens'},
+            {name:'Documentos'},
+            {name:'Relatórios BI'},
+            {name:'Configurações'},
+            {name:'Central de Aprendizado'},
+            {name:'Suporte'}
+          ];
+          const sizes = [
+            {id:'desktop',width:1440,height:900},
+            {id:'tablet',width:768,height:1024},
+            {id:'mobile',width:390,height:844}
+          ];
+          const report=[];
+          const slug=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-');
+          async function clickVisible(page,name){
+            const exact=page.getByRole('button',{name,exact:true});
+            const loc=exact.filter({visible:true}).first();
+            if(await loc.count()===0)return false;
+            await loc.click({timeout:3500});return true;
+          }
+          async function navigate(page,t){
+            if(t.name==='Painel')return;
+            if(!await clickVisible(page,t.name)){
+              if(!await clickVisible(page,'Mais módulos')) await clickVisible(page,'Menu');
+              await page.waitForTimeout(200);
+              if(!await clickVisible(page,t.name))throw Error('Destino nao localizado: '+t.name);
+            }
+            if(t.child){
+              await page.waitForTimeout(300);
+              if(!await clickVisible(page,t.child))throw Error('Subpagina nao localizada: '+t.child);
+            }
+          }
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            try{
+              for(const size of sizes){
+                const context=await browser.newContext({viewport:{width:size.width,height:size.height},deviceScaleFactor:1,locale:'pt-BR',timezoneId:'America/Sao_Paulo',isMobile:size.id==='mobile',hasTouch:size.id!=='desktop',colorScheme:'light'});
+                for(const t of targets){
+                  // Desktop: all targets. Tablet/mobile: representative first pass.
+                  if(size.id!=='desktop'&&!['Painel','Financeiro','Compras','Mensagens','Orçamentos'].includes(t.name))continue;
+                  const page=await context.newPage();
+                  const errors=[];
+                  page.on('pageerror',e=>errors.push(String(e.message).slice(0,250)));
+                  const id=size.id+'-'+slug(t.name+' '+(t.child||''));
+                  const row={id,target:t.name,child:t.child||null,viewport:size.id,ok:false,errors};
+                  try{
+                    const response=await page.goto(process.env.MOVA_URL,{waitUntil:'domcontentloaded',timeout:20000});
+                    if(!response||!response.ok())throw Error('HTTP '+response?.status());
+                    await page.getByRole('button',{name:'Painel',exact:true}).filter({visible:true}).first().waitFor({timeout:15000});
+                    await navigate(page,t);
+                    await page.waitForTimeout(400);
+                    const state=await page.evaluate(()=>{
+                      const root=document.documentElement;
+                      const vis=e=>!!e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden';
+                      return {title:document.title,route:document.body.dataset.route||null,viewport:innerWidth,documentWidth:root.scrollWidth,overflow:Math.max(0,root.scrollWidth-innerWidth),headings:[...document.querySelectorAll('h1,h2,h3')].filter(vis).map(e=>e.innerText.trim()).slice(0,12),inputs:[...document.querySelectorAll('input,select,textarea')].filter(vis).length,buttons:[...document.querySelectorAll('button')].filter(vis).length,visibleText:document.body.innerText.slice(0,1500)};
+                    });
+                    Object.assign(row,state);
+                    await page.screenshot({path:'audit/'+id+'.png',animations:'disabled',timeout:10000});
+                    row.ok=true;
+                  }catch(e){
+                    row.error=String(e.message).slice(0,300);
+                    try{await page.screenshot({path:'audit/'+id+'-blocked.png',timeout:5000})}catch{}
+                  }finally{
+                    report.push(row);
+                    console.log('AUDIT '+JSON.stringify({...row,visibleText:undefined}));
+                    await page.close();
+                  }
+                }
+                await context.close();
+              }
+            }finally{
+              await browser.close();
+              fs.writeFileSync('audit/report.json',JSON.stringify(report,null,2));
+              const ok=report.filter(r=>r.ok).length;
+              console.log('RESULT '+JSON.stringify({attempted:report.length,captured:ok,blocked:report.length-ok}));
+              if(!ok)process.exitCode=1;
+            }
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          JS
+          node audit.cjs
+      - name: Upload screenshots and diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mova-visual-audit
+          path: audit/
+          retention-days: 7
+          if-no-files-found: warn
