@@ -1,0 +1,100 @@
+name: MOVA - homologacao do novo wireframe
+on:
+  push:
+    branches: [main]
+    paths:
+      - wireframe/**
+      - .github/workflows/wireframe-check.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mova-wireframe-check
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        width: [390, 1440]
+        theme: [light, dark]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: |
+          npm install --no-audit --no-fund --ignore-scripts playwright@1.56.1 axe-core@4.10.3
+          npx playwright install --with-deps chromium
+      - name: Test wireframe
+        env:
+          WIDTH: ${{ matrix.width }}
+          THEME: ${{ matrix.theme }}
+        run: |
+          mkdir -p evidence
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/mova-http.log 2>&1 &
+          cat > smoke.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const fs=require('node:fs');
+          const width=+process.env.WIDTH,theme=process.env.THEME;
+          const rows=[],errors=[];
+          let browser;
+          (async()=>{
+            try{
+              browser=await chromium.launch();
+              const page=await browser.newPage({viewport:{width,height:width===390?844:900},deviceScaleFactor:1,isMobile:width===390,hasTouch:width===390,locale:'pt-BR'});
+              page.on('pageerror',e=>errors.push(e.message));
+              const visible=(s)=>page.locator(s).filter({visible:true}).first();
+              const click=async(a)=>visible('button[data-action='+JSON.stringify(a)+']').click({timeout:5000});
+              const assert=(c,m)=>{if(!c)throw Error(m)};
+              async function test(name,fn){
+                const row={name,ok:false};
+                try{
+                  await fn();
+                  await page.waitForTimeout(150);
+                  row.overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-innerWidth));
+                  await page.screenshot({path:'evidence/'+name+'.png',animations:'disabled'});
+                  assert(row.overflow<=2,'Estouro da pagina: '+row.overflow);
+                  row.ok=true;
+                }catch(e){row.error=e.message.slice(0,700);try{await page.screenshot({path:'evidence/'+name+'-failed.png'})}catch{}}
+                rows.push(row);console.log('CHECK '+JSON.stringify(row));
+              }
+              await page.goto('http://127.0.0.1:8765/wireframe/',{waitUntil:'load'});
+              if(theme==='dark')await click('theme');
+              await test('01-login',async()=>{assert(await visible('[data-action=login]').isVisible(),'Login ausente')});
+              await click('login');
+              await test('02-dashboard',async()=>{assert(await page.getByRole('heading',{name:'Visão geral',exact:true}).isVisible(),'Painel ausente')});
+              await test('03-payments',async()=>{await click('go:finance-payments');assert(await page.getByRole('heading',{name:'Contas a pagar',exact:true}).isVisible(),'Rota incorreta')});
+              await test('04-search',async()=>{await page.locator('#list-search').fill('Horizonte');assert(await visible('#list-results').innerText().then(x=>x.includes('Horizonte')&&!x.includes('Locadora')),'Filtro incorreto');await page.locator('#list-search').fill('')});
+              await test('05-summary',async()=>{await click('view:CP-1042');assert(await page.locator('#dialog').isVisible(),'Resumo ausente');assert(await page.locator('#dialog').innerText().then(s=>s.includes('18.750,00')),'Valor ausente')});
+              await test('06-editor',async()=>{await click('edit:CP-1042');assert(await page.locator('#f-party').isVisible(),'Editor ausente');await page.locator('#f-description').fill('Material revisado');await click('save');assert(await page.locator('#list-results').innerText().then(s=>s.includes('Material revisado')),'Edicao nao refletida');await click('edit:CP-1042')});
+              if(await page.locator('#dialog').isVisible())await click('close');
+              await test('07-settlement',async()=>{await click('settle:CP-1042');await click('confirm-settle:CP-1042');assert(await page.locator('#list-results').innerText().then(s=>s.includes('Pago')),'Status ausente')});
+              await test('08-receipts',async()=>{await click('go:finance-receipts');assert(await page.getByRole('heading',{name:'Contas a receber',exact:true}).isVisible(),'Rota incorreta')});
+              await test('09-cash',async()=>{await click('go:finance-cash');assert(await page.getByRole('heading',{name:'Fluxo de caixa',exact:true}).isVisible(),'Rota incorreta')});
+              await test('10-requests',async()=>{await click('go:purchase-requests');assert(await page.getByRole('heading',{name:'Solicitações',exact:true}).isVisible(),'Rota incorreta')});
+              await test('11-orders',async()=>{await click('go:purchase-orders');assert(await page.getByRole('heading',{name:'Ordens de compra',exact:true}).isVisible(),'Rota incorreta')});
+              async function module(r){if(width===390)await click('more');await click('go:'+r)}
+              await test('12-budgets',async()=>{await module('budgets');assert(await page.getByRole('heading',{name:'Orçamentos',exact:true}).isVisible(),'Rota incorreta')});
+              await test('13-clients',async()=>{await module('clients');assert(await page.getByRole('heading',{name:'Clientes',exact:true}).isVisible(),'Rota incorreta')});
+              await test('14-messages',async()=>{await click('go:messages');await click('thread:0');await page.getByRole('textbox',{name:'Escreva uma mensagem'}).fill('Teste demonstrativo');await page.getByRole('button',{name:'Enviar mensagem'}).click();assert(await page.locator('.threadbody').innerText().then(s=>s.includes('Teste demonstrativo')),'Envio nao refletido')});
+              await test('15-theme',async()=>{assert(await page.locator('html').getAttribute('data-theme')===theme,'Tema incorreto')});
+              await page.evaluate(require('axe-core').source);
+              const violations=await page.evaluate(async()=>{const a=await axe.run({runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});return a.violations.map(v=>({id:v.id,impact:v.impact,count:v.nodes.length}))});
+              rows.push({name:'axe-messages',violations,ok:violations.length===0});
+            }catch(e){rows.push({name:'startup',ok:false,error:e.message})}
+            finally{
+              if(browser)await browser.close();
+              const summary={width,theme,attempted:rows.length,passed:rows.filter(r=>r.ok).length,errors};
+              fs.writeFileSync('evidence/report.json',JSON.stringify({summary,rows},null,2));console.log('WIREFRAME '+JSON.stringify(summary));if(errors.length||rows.some(x=>!x.ok))process.exitCode=1;
+            }
+          })();
+          JS
+          node smoke.cjs
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mova-wireframe-${{ matrix.width }}-${{ matrix.theme }}
+          path: evidence/
+          retention-days: 7
