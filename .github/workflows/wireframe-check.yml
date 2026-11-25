@@ -74,7 +74,7 @@ jobs:
               await test('03-payments',async()=>{await click('go:finance-payments');assert(await page.getByRole('heading',{name:'Contas a pagar',exact:true}).isVisible(),'Rota incorreta')});
               await test('04-search',async()=>{await page.locator('#list-search').fill('Horizonte');assert(await visible('#list-results').innerText().then(x=>x.includes('Horizonte')&&!x.includes('Locadora')),'Filtro incorreto');await page.locator('#list-search').fill('')});
               await test('05-summary',async()=>{await click('view:CP-1042');assert(await page.locator('#dialog').isVisible(),'Resumo ausente');assert(await page.locator('#dialog').innerText().then(s=>s.includes('18.750,00')),'Valor ausente')});
-              await test('06-editor',async()=>{await click('edit:CP-1042');assert(await page.locator('#f-party').isVisible(),'Editor ausente');await page.locator('#f-description').fill('Material revisado');await click('save');assert(await page.locator('#list-results').innerText().then(s=>s.includes('Material revisado')),'Edicao nao refletida');await click('edit:CP-1042')});
+              await test('06-editor',async()=>{await click('edit:CP-1042');assert(await page.locator('#f-party').isVisible(),'Editor ausente');await page.locator('#f-description').fill('Material revisado');await click('save');assert(await page.locator('#list-results').innerText().then(s=>s.includes('Material revisado')),'Edicao nao refletida');assert(await page.locator('#dialog').isVisible(),'Resumo não restaurado após salvar');await click('close');await click('edit:CP-1042')});
               if(await page.locator('#dialog').isVisible())await click('close');
               await test('07-settlement',async()=>{await click('settle:CP-1042');await click('confirm-settle:CP-1042');assert(await page.locator('#list-results').innerText().then(s=>s.includes('Pago')),'Status ausente')});
               await test('08-receipts',async()=>{await click('go:finance-receipts');assert(await page.getByRole('heading',{name:'Contas a receber',exact:true}).isVisible(),'Rota incorreta')});
@@ -100,9 +100,11 @@ jobs:
               await test('17-item-editor',async()=>{
                 await click('go:purchase-requests');await click('edit:SC-032');
                 await click('add-item');
-                await page.locator('[data-item=description]').fill('Material teste');
-                await page.locator('[data-item=qty]').fill('3');
-                await page.locator('[data-item=unit]').fill('125');
+                await page.locator('#f-itemDescription').fill('Material teste');
+                await page.locator('#f-itemQty').fill('3');
+                await page.locator('#f-itemUnit').fill('125');
+                await page.screenshot({path:'evidence/17-item-child.png',animations:'disabled'});
+                await page.locator('.item-modal-r28 [data-item-action=save]').click();
                 assert(await page.locator('#f-amount').inputValue()==='375.00','Total incorreto');
                 await page.screenshot({path:'evidence/17-item-editor-open.png',animations:'disabled'});
                 await click('save');
@@ -178,7 +180,8 @@ jobs:
               });
               await test('25-item-removal',async()=>{
                 await click('go:purchase-requests');await click('edit:SC-032');
-                await page.locator('#item-lines .itemline button[data-action="remove-item"]').first().click();
+                await page.locator('#item-lines .itemline button[data-action^="item-remove:"]').first().click();
+                await page.locator('.item-modal-r28 [data-item-action=remove]').click();
                 assert(await page.locator('#f-amount').inputValue()==='0.00','Valor residual após remover item');
                 await click('close');await click('discard');
               });
@@ -563,6 +566,28 @@ jobs:
                 await click('view:SC-032');assert(await page.locator('#dialog [data-action="record-detail:SC-032"]').count()===1,'Acompanhamento duplicado');
                 await click('record-detail:SC-032');assert(await page.locator('.purchase-detail-page-r25').isVisible(),'Resumo não conduz à página');
                 await page.screenshot({path:'evidence/76-acompanhamento.png'});
+              });
+              await test('77-child-window-return',async()=>{
+                await page.evaluate(()=>go('budgets'));await click('view:OR-012');await click('edit:OR-012');
+                const depth=await page.locator('#dialog').getAttribute('data-depth');
+                assert(depth==='1','Janela pai não registrada');
+                await click('close');assert(await page.locator('#dialog-title').innerText()==='Resumo do registro','Fechamento não retornou ao resumo');
+                await click('close');assert(!await page.locator('#dialog').isVisible(),'Resumo não fechou');
+              });
+              await test('78-item-draft-preservation',async()=>{
+                await page.evaluate(()=>go('budgets'));await click('edit:OR-012');
+                await page.locator('#f-notes').fill('Rascunho preservado');
+                await click('add-item');await page.locator('#f-itemDescription').fill('Item descartado');
+                await page.locator('.item-modal-r28 [data-item-action=cancel]').click();
+                assert(await page.locator('#f-notes').inputValue()==='Rascunho preservado','Rascunho perdido');
+                assert(await page.locator('#item-lines .itemline').count()===3,'Cancelamento alterou itens');
+                await click('item-edit:0');
+                await page.locator('#f-itemQty').fill('600');
+                await page.locator('.item-modal-r28 [data-item-action=save]').click();
+                assert(await page.locator('#f-amount').inputValue()==='450000.00','Total não recalculado');
+                assert(await page.locator('#item-lines .item-stage-r28').count()===2,'Agrupamento de etapas perdido');
+                await page.screenshot({path:'evidence/78-budget-items.png',animations:'disabled'});
+                await click('close');await click('discard');
               });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){

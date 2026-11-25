@@ -1,0 +1,623 @@
+{
+  "revision": "R28",
+  "basis": "f6a398504fb7f545c244a1b67abef132b6aa6290",
+  "definition": "A rota só é aceita após inspeção visual e testes de comportamento. Captura automática não equivale a aprovação.",
+  "viewports": [
+    1440,
+    768,
+    390,
+    360
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "dimensions": [
+    "hierarquia",
+    "layout",
+    "cards",
+    "coleções",
+    "formulários",
+    "janelas",
+    "navegação",
+    "animações",
+    "estados",
+    "acessibilidade"
+  ],
+  "routes": [
+    {
+      "id": "help-center",
+      "title": "Central de treinamento",
+      "group": "Aprendizado",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "help-trails",
+      "title": "Cursos",
+      "group": "Aprendizado",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "help-demos",
+      "title": "Demonstrações práticas",
+      "group": "Aprendizado",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "help-authoring",
+      "title": "Gestão de cursos",
+      "group": "Aprendizado",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "help-faq",
+      "title": "Perguntas frequentes",
+      "group": "Aprendizado",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "help-tours",
+      "title": "Tours guiados",
+      "group": "Aprendizado",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "help-paths",
+      "title": "Trilhas",
+      "group": "Aprendizado",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "categories",
+      "title": "Categorias",
+      "group": "Cadastros",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "cost-centers",
+      "title": "Centros de custo",
+      "group": "Cadastros",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "clients",
+      "title": "Clientes",
+      "group": "Cadastros",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "contracts",
+      "title": "Contratos",
+      "group": "Cadastros",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "suppliers",
+      "title": "Fornecedores",
+      "group": "Cadastros",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "plans",
+      "title": "Plano de contas",
+      "group": "Cadastros",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "professionals",
+      "title": "Profissionais",
+      "group": "Cadastros",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "lookups",
+      "title": "Tipologias e listas",
+      "group": "Cadastros",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "purchase-quotes",
+      "title": "Cotações",
+      "group": "Compras",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "purchase-invoices",
+      "title": "Notas fiscais",
+      "group": "Compras",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "purchase-orders",
+      "title": "Ordens de compra",
+      "group": "Compras",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "purchase-requests",
+      "title": "Solicitações",
+      "group": "Compras",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-login",
+      "title": "Acesso e login",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-approvals",
+      "title": "Aprovações",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "audit",
+      "title": "Auditoria",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-automations",
+      "title": "Automações",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-staging",
+      "title": "Backend e staging",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-home",
+      "title": "Configurações",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-documents",
+      "title": "Documentos e numerações",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "companies",
+      "title": "Empresas e ambientes",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "profile",
+      "title": "Meu perfil",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-purchases",
+      "title": "Parâmetros de compras",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-finance",
+      "title": "Parâmetros financeiros",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-access",
+      "title": "Perfis e acessos",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "regional-settings",
+      "title": "Preferências de formato",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-migration",
+      "title": "Saneamento de dados",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-security",
+      "title": "Segurança e sessão",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "users",
+      "title": "Usuários e permissões",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "settings-workflows",
+      "title": "Workflows",
+      "group": "Configurações",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "document-center",
+      "title": "Documentos",
+      "group": "Documentos",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-items",
+      "title": "Cadastro de itens",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-catalog",
+      "title": "Catálogo",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-settings",
+      "title": "Configurações de estoque",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-deliveries",
+      "title": "Entregas",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-epi",
+      "title": "EPI",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-stock",
+      "title": "Estoques",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-forms",
+      "title": "Fichas e documentos",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-inventory",
+      "title": "Inventários",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-movements",
+      "title": "Movimentações",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-reports",
+      "title": "Relatórios de estoque",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-custody",
+      "title": "Responsabilidades",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-reservations",
+      "title": "Solicitações e reservas",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "warehouse-overview",
+      "title": "Visão geral do estoque",
+      "group": "Estoque",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "finance-payments",
+      "title": "Contas a pagar",
+      "group": "Financeiro",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "finance-receipts",
+      "title": "Contas a receber",
+      "group": "Financeiro",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "finance-banks",
+      "title": "Contas bancárias",
+      "group": "Financeiro",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "finance-reconciliation",
+      "title": "Extratos e conciliação",
+      "group": "Financeiro",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "finance-closing",
+      "title": "Fechamento financeiro",
+      "group": "Financeiro",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "finance-cash",
+      "title": "Fluxo de caixa",
+      "group": "Financeiro",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "finance-entries",
+      "title": "Lançamentos",
+      "group": "Financeiro",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "finance-payment-plans",
+      "title": "Parcelamentos",
+      "group": "Financeiro",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "finance-results",
+      "title": "Resultados",
+      "group": "Financeiro",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "finance-treasury",
+      "title": "Tesouraria",
+      "group": "Financeiro",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "messages",
+      "title": "Mensagens",
+      "group": "Mensagens",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "budgets",
+      "title": "Orçamentos",
+      "group": "Orçamentos",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "dashboard",
+      "title": "Painel",
+      "group": "Painel",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "bi-reports",
+      "title": "Relatórios BI",
+      "group": "Relatórios BI",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "help-support",
+      "title": "Central de Suporte",
+      "group": "Suporte",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    },
+    {
+      "id": "task-center",
+      "title": "Central de Tarefas",
+      "group": "Tarefas",
+      "visual": "pending",
+      "behavior": "pending",
+      "design": "pending",
+      "findings": []
+    }
+  ]
+}
