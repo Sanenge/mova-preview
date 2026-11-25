@@ -403,6 +403,28 @@ jobs:
                 await module('clients');
                 if(width===390)assert(await page.locator('.mobilebar button[data-action="more"][aria-current="page"]').count()===1,'Seleção de Mais ausente');
               });
+              await test('54-cash-visualization',async()=>{
+                await click('go:finance-payments');await click('go:finance-cash');
+                assert(await page.locator('.cash-line').count()===1,'Evolução de saldo ausente');
+                await click('cash-filter:Entrada');
+                assert(await page.locator('.cash-movement .cash-direction.out').count()===0,'Filtro de entradas incorreto');
+                await click('cash-filter:Saída');
+                assert(await page.locator('.cash-movement .cash-direction.in').count()===0,'Filtro de saídas incorreto');
+                await click('cash-filter:all');
+                assert(await page.locator('.cash-movement').count()>0,'Movimentos ausentes');
+              });
+              await test('55-report-comparison',async()=>{
+                await click('go:finance-payments');await click('go:finance-results');
+                assert(await page.locator('.center-result').count()>0,'Centros de custo ausentes');
+                assert(await page.locator('.center-bar-track').count()===2*await page.locator('.center-result').count(),'Séries inconsistentes');
+              });
+              await test('56-settings-search',async()=>{
+                await module('settings-home');
+                await page.locator('#settings-search').fill('seguranca');
+                assert(await page.locator('.settings-group').count()===1,'Pesquisa de configurações incorreta');
+                await page.locator('#settings-search').fill('');
+                assert(await page.locator('.settings-group').count()===3,'Agrupamentos ausentes');
+              });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
