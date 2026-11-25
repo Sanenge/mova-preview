@@ -1,0 +1,94 @@
+name: MOVA - matriz completa de rotas
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/route-matrix.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  routes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        width: [390, 1440]
+        theme: [light, dark]
+    steps:
+      - name: Install Playwright
+        run: |
+          npm install --no-audit --no-fund --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Capture registered demo routes
+        env:
+          WIDTH: ${{ matrix.width }}
+          THEME: ${{ matrix.theme }}
+          MOVA_URL: https://sanenge.github.io/mova-preview/
+        run: |
+          mkdir -p audit
+          cat > routes.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const fs=require('node:fs');
+          const width=Number(process.env.WIDTH),theme=process.env.THEME;
+          const rows=[],errors=[];
+          let startupError=null,browser;
+          const safe=s=>String(s).replace(/[^a-zA-Z0-9_-]/g,'_');
+          (async()=>{
+            try{
+              browser=await chromium.launch({headless:true});
+              const page=await browser.newPage({viewport:{width,height:width===390?844:900},deviceScaleFactor:1,locale:'pt-BR',colorScheme:theme,hasTouch:width===390,isMobile:width===390});
+              page.on('pageerror',e=>errors.push(String(e.message).slice(0,300)));
+              const response=await page.goto(process.env.MOVA_URL,{waitUntil:'load',timeout:60000});
+              if(!response?.ok())throw Error('HTTP '+response?.status());
+              await page.waitForFunction(()=>typeof Registry!=='undefined'&&typeof Store!=='undefined'&&typeof App!=='undefined',{},{timeout:45000});
+              const demo=page.locator('[data-mova-demo-enter]').first();
+              if(await demo.isVisible()){
+                await page.screenshot({path:'audit/00-login.png',animations:'disabled'});
+                await demo.click({timeout:10000});
+                await demo.waitFor({state:'hidden',timeout:15000});
+              }
+              await page.evaluate(theme=>{Store.set({theme});App.render()},theme);
+              const routes=await page.evaluate(()=>Object.entries(Registry.routes).map(([id,r])=>({id,title:r.title,module:r.module,hidden:!!(r.hidden||r.menuHidden)})));
+              console.log('REGISTERED '+routes.length);
+              fs.writeFileSync('audit/registry.json',JSON.stringify(routes,null,2));
+              for(const route of routes){
+                const item={...route,ok:false};
+                const before=errors.length;
+                try{
+                  await page.evaluate(r=>{Store.set({route:r});App.render()},route.id);
+                  await page.waitForTimeout(120);
+                  Object.assign(item,await page.evaluate(()=>{
+                    const root=document.querySelector('.app-content');
+                    const vis=e=>!!e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden';
+                    return {actualRoute:Store.get().route,rendered:!!root&&root.textContent.trim().length>10,heading:root?.querySelector('h1,h2')?.textContent?.trim()||'',overflow:Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth),actualTheme:document.documentElement.dataset.theme,inputs:root?[...root.querySelectorAll('input,select,textarea')].filter(vis).length:0,actions:root?[...root.querySelectorAll('button:not([disabled])')].filter(vis).length:0};
+                  }));
+                  if(await demo.isVisible())throw Error('Login visivel');
+                  if(!item.rendered)throw Error('Conteudo nao renderizado');
+                  await page.screenshot({path:'audit/'+safe(route.id)+'.png',animations:'disabled',timeout:10000});
+                  item.ok=item.actualRoute===route.id&&item.actualTheme===theme&&item.overflow<=2&&errors.length===before;
+                }catch(e){item.error=String(e.message).slice(0,600)}
+                item.errors=errors.slice(before);
+                rows.push(item);
+                console.log('ROUTE '+JSON.stringify(item));
+              }
+            }catch(e){startupError=String(e.message).slice(0,1000);console.error(startupError)}
+            finally{
+              if(browser)await browser.close();
+              const summary={width,theme,registered:rows.length,passed:rows.filter(r=>r.ok).length,rendered:rows.filter(r=>r.rendered).length,overflow:rows.filter(r=>r.overflow>2).length,startupError,errors};
+              fs.writeFileSync('audit/report.json',JSON.stringify({summary,rows},null,2));
+              console.log('MATRIX '+JSON.stringify(summary));
+              if(startupError||!rows.length||summary.passed!==rows.length)process.exitCode=1;
+            }
+          })();
+          JS
+          node routes.cjs
+      - name: Upload visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mova-routes-${{ matrix.width }}-${{ matrix.theme }}
+          path: audit/
+          retention-days: 7
+          if-no-files-found: error
