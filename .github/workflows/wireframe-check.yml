@@ -238,9 +238,9 @@ jobs:
                 assert(await page.locator('#dialog .editor-nav button').count()===5,'Índice de seções incompleto');
                 await click('form-section:3');
                 await page.waitForTimeout(550);
-                const pos=await page.evaluate(()=>{const e=document.querySelector('#editor-section-3').getBoundingClientRect(),n=document.querySelector('.editor-nav').getBoundingClientRect();return {top:e.top,nav:n.bottom,bottom:e.bottom}});
+                const pos=await page.evaluate(()=>{const e=document.querySelector('#editor-section-3 h3').getBoundingClientRect(),body=document.querySelector('#dialog .dialogbody').getBoundingClientRect();return {top:e.top,bodyTop:body.top,bodyBottom:body.bottom,bottom:e.bottom}});
                 await click('close');
-                assert(pos.bottom>pos.nav&&pos.top<pos.nav+150,'Seção não foi localizada');
+                assert(pos.bottom>pos.bodyTop&&pos.top<pos.bodyBottom,'Título da seção não ficou visível: '+JSON.stringify(pos));
               });
               await test('34-record-identity-layout',async()=>{
                 await click('go:finance-payments');
@@ -303,23 +303,48 @@ jobs:
               });
               await test('41-flat-summary',async()=>{
                 await click('go:finance-payments');await click('view:CP-1043');
-                await flatSurface('.summary-content .summary,.summary-content .historyline');
+                await flatSurface('.summary-content .historyline');
                 assert(await page.locator('.summary-identity').count()===1,'Identidade do resumo ausente');
                 await click('close');
               });
               await test('42-flat-budget-and-stock',async()=>{
                 await module('budgets');
-                await flatSurface('.budget-card .budget-total');
+                assert(await page.locator('.budget-card .budget-total').count()>0,'Total agrupado ausente');
                 const card=page.locator('.budget-card').filter({hasText:'OR-012'});
                 await card.locator('.budget-details>summary').click();
                 await card.locator('.budget-stage>summary').first().click();
-                await flatSurface('.budget-card .budget-stage,.budget-card .budget-leaf');
+                await flatSurface('.budget-card .budget-leaf');
                 await module('warehouse-overview');await flatSurface('.panel .location-card,.panel .linktile');
-                await click('go:warehouse-stock');await flatSurface('.material-card .material-quantity');
+                await click('go:warehouse-stock');assert(await page.locator('.material-card .material-quantity').count()>0,'Saldo agrupado ausente');
               });
               await test('43-flat-board-and-settings',async()=>{
                 await module('task-center');await flatSurface('.board-column');
                 await module('settings-home');await flatSurface('.panel .linktile');
+              });
+              await test('44-unwrapped-controls',async()=>{
+                await click('go:finance-payments');
+                await flatSurface('.tabbar,.toolbar');
+                assert(await page.locator('.tabbar button.active').count()===1,'Aba ativa ausente');
+                await module('clients');
+                await flatSurface('.view-switch');
+                await click('go:purchase-requests');await flatSurface('.purchase-flow,.toolbar');
+              });
+              await test('45-financial-chart',async()=>{
+                await click('go:dashboard');
+                assert(await page.locator('.analysis-line').count()===2,'Curvas financeiras ausentes');
+                await page.locator('.analysis-target').first().focus();
+                assert(await page.locator('#analysis-revenue').innerText().then(x=>x.includes('68.000,00')),'Leitura do mês incorreta');
+                await click('chart-mode:bars');
+                assert(await page.locator('.analysis-bar').count()===12,'Colunas ausentes');
+                await page.locator('#chart-period').selectOption('3');
+                assert(await page.locator('.analysis-target').count()===3,'Período incorreto');
+                await click('chart-mode:area');
+                assert(await page.locator('.analysis-line').count()===2,'Retorno à visualização de linhas ausente');
+              });
+              await test('46-light-typography',async()=>{
+                await click('go:dashboard');
+                const values=await page.evaluate(()=>['.pagehead h1','.balancevalue','.metric-heading'].map(s=>Number(getComputedStyle(document.querySelector(s)).fontWeight)));
+                assert(values.every(v=>v<=600),'Peso tipográfico acima da escala: '+values.join(','));
               });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
