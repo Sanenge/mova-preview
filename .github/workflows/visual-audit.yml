@@ -14,7 +14,7 @@ concurrency:
 jobs:
   visual:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - name: Install Playwright
         run: |
@@ -53,15 +53,22 @@ jobs:
             {id:'mobile',width:390,height:844}
           ];
           const report=[];
+          const loginCaptured=new Set();
           const slug=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-');
           async function clickVisible(page,name){
             const exact=page.getByRole('button',{name,exact:true});
-            const loc=exact.filter({visible:true}).first();
-            if(await loc.count()===0)return false;
-            await loc.click({timeout:3500});return true;
+            const loc=exact.filter({visible:true});
+            for(let i=0;i<await loc.count();i++){
+              try{await loc.nth(i).click({timeout:1800});return true}catch{}
+            }
+            return false;
           }
           async function navigate(page,t){
             if(t.name==='Painel')return;
+            if(t.child && await clickVisible(page,t.child))return;
+            if(t.name==='Mensagens'){
+              if(await clickVisible(page,'Mensagens'))return;
+            }
             if(!await clickVisible(page,t.name)){
               if(!await clickVisible(page,'Mais módulos')) await clickVisible(page,'Menu');
               await page.waitForTimeout(200);
@@ -84,11 +91,21 @@ jobs:
                   const errors=[];
                   page.on('pageerror',e=>errors.push(String(e.message).slice(0,250)));
                   const id=size.id+'-'+slug(t.name+' '+(t.child||''));
-                  const row={id,target:t.name,child:t.child||null,viewport:size.id,ok:false,errors};
+                  const row={id,target:t.name,child:t.child||null,device:size.id,ok:false,errors};
                   try{
                     const response=await page.goto(process.env.MOVA_URL,{waitUntil:'domcontentloaded',timeout:20000});
                     if(!response||!response.ok())throw Error('HTTP '+response?.status());
                     await page.getByRole('button',{name:'Painel',exact:true}).filter({visible:true}).first().waitFor({timeout:15000});
+                    const demo=page.getByRole('button',{name:'Explorar o Mova de demonstração',exact:true});
+                    if(await demo.isVisible()){
+                      if(!loginCaptured.has(size.id)){
+                        await page.screenshot({path:'audit/'+size.id+'-login.png',animations:'disabled'});
+                        loginCaptured.add(size.id);
+                      }
+                      await demo.click({timeout:10000});
+                      await demo.waitFor({state:'hidden',timeout:12000});
+                    }
+                    await page.waitForTimeout(450);
                     await navigate(page,t);
                     await page.waitForTimeout(400);
                     const state=await page.evaluate(()=>{
@@ -98,9 +115,21 @@ jobs:
                     });
                     Object.assign(row,state);
                     await page.screenshot({path:'audit/'+id+'.png',animations:'disabled',timeout:10000});
+                    if(await demo.isVisible())throw Error('Login ainda visível');
                     row.ok=true;
+                    if(t.name==='Painel'){
+                      const action=page.getByRole('button',{name:'Novo lançamento',exact:true}).filter({visible:true}).first();
+                      if(await action.count()){
+                        try{
+                          await action.click({timeout:3500});
+                          await page.waitForTimeout(350);
+                          await page.screenshot({path:'audit/'+size.id+'-novo-lancamento.png',animations:'disabled'});
+                          row.formCapture=true;
+                        }catch(e){row.formError=String(e.message).slice(0,500)}
+                      }
+                    }
                   }catch(e){
-                    row.error=String(e.message).slice(0,300);
+                    row.error=String(e.message).slice(0,1200);
                     try{await page.screenshot({path:'audit/'+id+'-blocked.png',timeout:5000})}catch{}
                   }finally{
                     report.push(row);
