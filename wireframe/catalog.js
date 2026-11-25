@@ -1,4 +1,4 @@
-/* Catálogo central R02: dados fictícios, não integrações reais. */
+/* Catálogo central R03: registros de demonstração, sem integração real. */
 const R02_CATALOG = {
   "finance-banks": [
     "Contas bancárias",
@@ -635,6 +635,481 @@ const R02_CATALOG = {
         "Demonstração",
         0,
         "Ativo"
+      ]
+    ]
+  ],
+  "help-trails": [
+    "Cursos",
+    "Aprendizado",
+    "help",
+    "Curso",
+    "Curso",
+    "Conteúdo",
+    "Categoria",
+    "none",
+    [
+      "Disponível",
+      "Concluído"
+    ],
+    [
+      [
+        "CU-001",
+        "Primeiros passos no MOVA",
+        "Navegação e ambiente",
+        "Introdução",
+        0,
+        "Disponível"
+      ],
+      [
+        "CU-002",
+        "Financeiro na prática",
+        "Contas e conciliação",
+        "Financeiro",
+        0,
+        "Disponível"
+      ]
+    ]
+  ],
+  "help-paths": [
+    "Trilhas",
+    "Aprendizado",
+    "help",
+    "Trilha",
+    "Trilha",
+    "Etapas",
+    "Público",
+    "none",
+    [
+      "Disponível",
+      "Em andamento",
+      "Concluído"
+    ],
+    [
+      [
+        "TR-001",
+        "Gestor financeiro",
+        "3 cursos",
+        "Gestores",
+        0,
+        "Em andamento"
+      ]
+    ]
+  ],
+  "help-authoring": [
+    "Gestão de cursos",
+    "Aprendizado",
+    "help",
+    "Curso",
+    "Título",
+    "Descrição",
+    "Autor",
+    "none",
+    [
+      "Rascunho",
+      "Publicado"
+    ],
+    [
+      [
+        "GC-001",
+        "Integração de novos usuários",
+        "Aula introdutória",
+        "Equipe Demo",
+        0,
+        "Rascunho"
+      ]
+    ]
+  ],
+  "help-tours": [
+    "Tours guiados",
+    "Aprendizado",
+    "help",
+    "Tour",
+    "Título",
+    "Etapas",
+    "Módulo",
+    "none",
+    [
+      "Disponível",
+      "Concluído"
+    ],
+    [
+      [
+        "TG-001",
+        "Conheça o painel",
+        "Indicadores e atalhos",
+        "Painel",
+        0,
+        "Disponível"
+      ]
+    ]
+  ],
+  "help-demos": [
+    "Demonstrações práticas",
+    "Aprendizado",
+    "help",
+    "Demonstração",
+    "Título",
+    "Objetivo",
+    "Módulo",
+    "none",
+    [
+      "Disponível",
+      "Concluído"
+    ],
+    [
+      [
+        "DP-001",
+        "Registrar pagamento",
+        "Simulação sem movimentar valores",
+        "Financeiro",
+        0,
+        "Disponível"
+      ]
+    ]
+  ],
+  "help-support": [
+    "Central de Suporte",
+    "Suporte",
+    "help",
+    "Chamado",
+    "Assunto",
+    "Descrição",
+    "Categoria",
+    "none",
+    [
+      "Aberto",
+      "Em andamento",
+      "Resolvido"
+    ],
+    [
+      [
+        "CH-001",
+        "Dúvida sobre cadastro",
+        "Como alterar centro de custo?",
+        "Operação",
+        0,
+        "Aberto"
+      ]
+    ]
+  ],
+  "settings-access": [
+    "Perfis e acessos",
+    "Configurações",
+    "users",
+    "Perfil",
+    "Perfil",
+    "Descrição",
+    "Escopo",
+    "none",
+    [
+      "Ativo",
+      "Inativo"
+    ],
+    [
+      [
+        "PF-001",
+        "Administrador",
+        "Acesso demonstrativo integral",
+        "Empresa",
+        0,
+        "Ativo"
+      ],
+      [
+        "PF-002",
+        "Gestor",
+        "Operação e aprovação",
+        "Obra",
+        0,
+        "Ativo"
+      ]
+    ]
+  ],
+  "audit": [
+    "Auditoria",
+    "Configurações",
+    "task",
+    "Evento",
+    "Autor",
+    "Evento",
+    "Módulo",
+    "none",
+    [
+      "Registrado"
+    ],
+    [
+      [
+        "AU-001",
+        "Alex Demo",
+        "Acesso ao ambiente demonstrativo",
+        "Sessão",
+        0,
+        "Registrado"
+      ]
+    ]
+  ],
+  "finance-entries": [
+    "Lançamentos",
+    "Financeiro",
+    "wallet",
+    "Lançamento",
+    "Parte",
+    "Histórico",
+    "Centro de custo",
+    "money",
+    [
+      "Pendente",
+      "Pago",
+      "Recebido"
+    ],
+    [
+      [
+        "LA-001",
+        "Distribuidora Alfa",
+        "Materiais",
+        "Obra Litoral",
+        18750,
+        "Pendente"
+      ]
+    ]
+  ],
+  "warehouse-reservations": [
+    "Solicitações e reservas",
+    "Estoque",
+    "box",
+    "Reserva",
+    "Material",
+    "Solicitante",
+    "Local",
+    "qty",
+    [
+      "Pendente",
+      "Reservado",
+      "Entregue"
+    ],
+    [
+      [
+        "RE-001",
+        "Tubo PEAD DE160",
+        "Equipe de campo",
+        "Obra Litoral",
+        120,
+        "Reservado"
+      ]
+    ]
+  ],
+  "warehouse-items": [
+    "Cadastro de itens",
+    "Estoque",
+    "box",
+    "Item",
+    "Material",
+    "Especificação",
+    "Categoria",
+    "none",
+    [
+      "Ativo",
+      "Inativo"
+    ],
+    [
+      [
+        "IT-001",
+        "Tubo PEAD DE160",
+        "PE100 · m",
+        "Tubulações",
+        0,
+        "Ativo"
+      ]
+    ]
+  ],
+  "warehouse-custody": [
+    "Responsabilidades",
+    "Estoque",
+    "users",
+    "Termo",
+    "Responsável",
+    "Equipamento",
+    "Local",
+    "none",
+    [
+      "Ativo",
+      "Devolvido"
+    ],
+    [
+      [
+        "RS-001",
+        "Equipe de campo",
+        "Equipamento Demo",
+        "Obra Litoral",
+        0,
+        "Ativo"
+      ]
+    ]
+  ],
+  "warehouse-epi": [
+    "EPI",
+    "Estoque",
+    "box",
+    "Entrega de EPI",
+    "Profissional",
+    "Equipamento",
+    "Obra",
+    "qty",
+    [
+      "Pendente",
+      "Entregue"
+    ],
+    [
+      [
+        "EP-001",
+        "Ana Demo",
+        "Luva nitrílica",
+        "Obra Litoral",
+        2,
+        "Entregue"
+      ]
+    ]
+  ],
+  "warehouse-forms": [
+    "Fichas e documentos",
+    "Estoque",
+    "file",
+    "Ficha",
+    "Documento",
+    "Tipo",
+    "Responsável",
+    "none",
+    [
+      "Pendente",
+      "Emitido"
+    ],
+    [
+      [
+        "FI-001",
+        "Ficha de entrega",
+        "EPI",
+        "Almoxarifado",
+        0,
+        "Emitido"
+      ]
+    ]
+  ],
+  "warehouse-settings": [
+    "Configurações de estoque",
+    "Estoque",
+    "settings",
+    "Local",
+    "Nome",
+    "Descrição",
+    "Empresa",
+    "none",
+    [
+      "Ativo",
+      "Inativo"
+    ],
+    [
+      [
+        "AL-001",
+        "Almoxarifado central",
+        "Local principal",
+        "Empresa Modelo",
+        0,
+        "Ativo"
+      ]
+    ]
+  ],
+  "settings-approvals": [
+    "Aprovações",
+    "Configurações",
+    "task",
+    "Regra",
+    "Nome da regra",
+    "Abrangência",
+    "Módulo",
+    "money",
+    [
+      "Ativo",
+      "Inativo"
+    ],
+    [
+      [
+        "AP-001",
+        "Compras até 25 mil",
+        "Todos os centros",
+        "Compras",
+        25000,
+        "Ativo"
+      ]
+    ]
+  ],
+  "settings-workflows": [
+    "Workflows",
+    "Configurações",
+    "task",
+    "Fluxo",
+    "Nome do fluxo",
+    "Objeto",
+    "Módulo",
+    "none",
+    [
+      "Ativo",
+      "Rascunho"
+    ],
+    [
+      [
+        "WF-001",
+        "Fluxo de compras",
+        "Solicitação, cotação, ordem",
+        "Compras",
+        0,
+        "Ativo"
+      ]
+    ]
+  ],
+  "settings-automations": [
+    "Automações",
+    "Configurações",
+    "settings",
+    "Automação",
+    "Nome",
+    "Gatilho",
+    "Módulo",
+    "none",
+    [
+      "Ativo",
+      "Inativo"
+    ],
+    [
+      [
+        "AT-001",
+        "Aviso de vencimento",
+        "3 dias antes",
+        "Financeiro",
+        0,
+        "Ativo"
+      ]
+    ]
+  ],
+  "settings-migration": [
+    "Saneamento de dados",
+    "Configurações",
+    "file",
+    "Revisão",
+    "Nome da revisão",
+    "Descrição",
+    "Módulo",
+    "none",
+    [
+      "Pendente",
+      "Concluído"
+    ],
+    [
+      [
+        "MI-001",
+        "Revisar duplicidades",
+        "Verificação demonstrativa",
+        "Cadastros",
+        0,
+        "Pendente"
       ]
     ]
   ]
