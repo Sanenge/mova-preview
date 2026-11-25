@@ -121,7 +121,7 @@ function field(label,name,value='',type='text',extra=''){
 function validateDates(form){for(const el of form.querySelectorAll('[data-br-date]')){const bad=el.value&&!isoFromBR(el.value);el.setCustomValidity(bad?'Informe uma data válida no formato DD/MM/AAAA.':'')}return form.reportValidity()}
 function formValues(form){const values=Object.fromEntries(new FormData(form));for(const [key,value] of Object.entries(values))if(value instanceof File){if(value.name)values[key]=value.name;else delete values[key]}for(const el of form.querySelectorAll('[data-br-date]'))values[el.name]=el.value?isoFromBR(el.value):'';return values}
 function lookupField(label,name,value='',required=true,kind=name){
- return '<div class="field"><label for="f-'+name+'">'+esc(label)+'</label><div class="fieldrow"><input id="f-'+name+'" name="'+name+'" value="'+esc(value)+'" '+(required?'required':'')+'>'+iconbtn('Pesquisar '+label,'search','lookup:'+name+'|'+kind)+'</div></div>'
+ return '<div class="field"><label for="f-'+name+'">'+esc(label)+'</label><div class="fieldrow"><input id="f-'+name+'" name="'+name+'" value="'+esc(value)+'" '+(required?'required':'')+'>'+iconbtn('Pesquisar '+label,'search','lookup:'+name+(name===kind?'':'|'+kind))+'</div></div>'
 }
 let lookupTarget=null;
 const selector=document.createElement('dialog');selector.className='dialog selector-dialog';selector.id='selector';selector.setAttribute('aria-labelledby','selector-title');document.body.appendChild(selector);
