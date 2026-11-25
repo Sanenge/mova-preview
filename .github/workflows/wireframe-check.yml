@@ -133,7 +133,7 @@ jobs:
               await click('close');
               await test('20-no-duplicate-primary',async()=>{
                 await click('go:dashboard');
-                assert(await page.locator('#content button[data-action="new-finance"]:visible').count()===1,'Novo lançamento repetido');
+                assert(await page.locator('.shell button[data-action="new-finance"]:visible').count()===1,'Novo lançamento repetido');
                 await click('go:finance-payments');
                 assert(await page.locator('button[data-action="new"]:visible').count()===1,'Criação duplicada');
                 const repeated=await page.evaluate(()=>[...document.querySelectorAll('.tabbar button')].filter(e=>e.getClientRects().length).map(e=>e.dataset.action));
