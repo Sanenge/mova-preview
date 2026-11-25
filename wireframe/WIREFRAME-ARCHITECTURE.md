@@ -1,4 +1,4 @@
-# MOVA — Contrato de wireframe e prototipagem (R26)
+# MOVA — Contrato de wireframe e prototipagem (R28)
 
 ## Escopo
 Protótipo navegável, sem serviços reais. Cobertura de rotas não certifica cobertura de ações ou experiência.
@@ -34,3 +34,6 @@ Fase atual: arquitetura de informação, wireflows e consistência funcional, an
 - Validar campos, seleção e estados; rótulos, tooltips e unidades em gráficos.
 - Desktop e mobile: capturar lista, resumo, acompanhamento, edição, confirmação e resultado. Inspecionar capturas, não apenas contar testes.
 - Registrar separadamente implementação, validação técnica e revisão visual. Não atribuir percentual subjetivo de qualidade.
+
+## R28 — auditoria de interação
+Consulte audit/UX-R28.md. Janela filha e etapa de wizard são conceitos diferentes. As coleções de itens devem usar linhas de leitura e editor dedicado; orçamento agrupa por etapa. A cobertura visual permanece pendente.
