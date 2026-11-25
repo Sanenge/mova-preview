@@ -118,15 +118,22 @@
         "dossier tabs",
         "classification edit",
         "local attachment reference",
-        "settlement history"
+        "settlement history",
+        "payment planning with selection, review and approval states",
+        "batch settlement",
+        "reclassification, renegotiation, reversal and approval request windows",
+        "sample statement import and reconciliation link",
+        "aging summary",
+        "local CSV export"
       ],
       "remaining": [
-        "payment plans",
-        "batch operations",
-        "reclassification and renegotiation",
-        "reversal",
-        "bank import and reconciliation",
-        "report drill-down and export"
+        "realistic payment plan execution states and cancellation",
+        "partial settlement and retention allocation",
+        "recurring entries, liquidity and fiscal periods",
+        "bank import parsing not implemented (example only)",
+        "report drill-down",
+        "approval decision flow for individual financial entries",
+        "detailed validation against original UI"
       ]
     },
     {

@@ -502,6 +502,21 @@ jobs:
                 await page.evaluate(()=>go('finance-payments'));await click('view:CP-1043');await click('record-detail:CP-1043');await click('detail-tab:Classificação');
                 assert(await page.locator('.detail-rows-r22').isVisible(),'Dossiê ausente');await click('close');
               });
+              await test('67-finance-selection',async()=>{
+                await page.evaluate(()=>go('finance-payments'));await click('finance-plan');
+                await page.locator('#finance-selection-r23 [name=ledger]').first().check();await click('finance-selection-review');
+                assert(await page.locator('.finance-review-row').count()===1,'Revisão de seleção ausente');await click('finance-selection-confirm');
+                assert(await page.locator('.pagehead h1').innerText()==='Parcelamentos','Programação não criada');
+              });
+              await test('68-finance-record-operations',async()=>{
+                await page.evaluate(()=>go('finance-payments'));await click('view:CP-1043');await click('finance-record:CP-1043');
+                assert(await page.locator('.finance-action-list-r23').isVisible(),'Menu financeiro ausente');
+                await click('close');
+              });
+              await test('69-bank-import',async()=>{
+                await page.evaluate(()=>go('finance-reconciliation'));await click('finance-import');await click('finance-import-review');await click('finance-import-confirm');
+                assert(await page.locator('#list-results').innerText().then(x=>x.includes('Pagamento de frete')),'Movimento demonstrativo ausente');
+              });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
