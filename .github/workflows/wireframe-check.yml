@@ -200,7 +200,7 @@ jobs:
               });
               await test('28-domain-form-layout',async()=>{
                 await click('go:finance-payments');await click('edit:CP-1043');
-                assert(await page.locator('#dialog .domain-section').count()===3,'Seções de lançamento ausentes');
+                assert(await page.locator('#dialog .domain-section:not(.base-section):not(.notes-section)').count()===3,'Seções de lançamento ausentes');
                 assert(await page.locator('#f-invoiceFile').count()===1,'Anexo fiscal ausente');
                 await click('close');
               });
@@ -255,6 +255,35 @@ jobs:
                 await module('clients');
                 const bounds=await page.evaluate(()=>[...document.querySelectorAll('.view-switch button')].map(e=>e.getBoundingClientRect().top));
                 assert(bounds.length===2&&Math.abs(bounds[0]-bounds[1])<=2,'Controle de visualização quebrou linha');
+              });
+              await test('36-purchase-flow-layout',async()=>{
+                await click('go:purchase-requests');
+                assert(await page.locator('.purchase-flow .purchase-step').count()===4,'Etapas de compras ausentes');
+                assert(await page.locator('.tabbar').count()===0,'Navegação de compras duplicada');
+                await click('view:SC-032');
+                assert(await page.locator('.summary-flow .current').count()===1,'Etapa do registro não indicada');
+                await click('close');
+              });
+              await test('37-budget-tree-layout',async()=>{
+                await module('budgets');
+                assert(await page.locator('.budget-card').count()===2,'Cards de orçamentos ausentes');
+                const card=page.locator('.budget-card').filter({hasText:'OR-012'});
+                await card.locator('.budget-details>summary').click();
+                await card.locator('.budget-stage>summary').first().click();
+                assert(await card.locator('.budget-leaf:visible').count()>0,'Hierarquia não expansível');
+                await click('edit:OR-012');
+                assert(await page.locator('[data-item=stage]').count()===3,'Etapas ausentes no formulário');
+                assert(await page.locator('#f-amount').inputValue()==='425000','Valor do orçamento inconsistente');
+                await click('close');
+              });
+              await test('38-stock-layout',async()=>{
+                await module('warehouse-overview');
+                assert(await page.locator('.stock-track').count()===1,'Indicador visual de disponibilidade ausente');
+                assert(await page.locator('.location-card').count()>0,'Locais ausentes');
+                await click('go:warehouse-stock');
+                assert(await page.locator('.material-card').count()===3,'Cards de materiais ausentes');
+                await click('view-mode:list');assert(await page.locator('.tablewrap').count()===1,'Lista de estoque ausente');
+                await click('view-mode:stock');
               });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
