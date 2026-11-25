@@ -60,6 +60,8 @@ jobs:
                   row.overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-innerWidth));
                   await page.screenshot({path:'evidence/'+name+'.png',animations:'disabled'});
                   assert(row.overflow<=2,'Estouro da pagina: '+row.overflow);
+                  row.clippedValues=await page.evaluate(()=>[...document.querySelectorAll('.metric,.balancevalue,.recordcard .money,td.money')].filter(e=>e.getClientRects().length&&e.scrollWidth>e.clientWidth+2).map(e=>e.textContent.trim()));
+                  assert(row.clippedValues.length===0,'Valores cortados: '+row.clippedValues.join(', '));
                   row.ok=true;
                 }catch(e){row.error=e.message.slice(0,700);try{await page.screenshot({path:'evidence/'+name+'-failed.png'})}catch{}}
                 rows.push(row);console.log('CHECK '+JSON.stringify(row));
@@ -89,6 +91,7 @@ jobs:
                 await click('edit:CP-1042');
                 await click('lookup:party');
                 await page.locator('#lookup-search').fill('Alfa');
+                await page.screenshot({path:'evidence/16-selector-open.png',animations:'disabled'});
                 assert(await page.locator('#selector .lookup-choice:visible').count()===1,'Pesquisa do seletor incorreta');
                 await page.locator('#selector .lookup-choice:visible').first().click();
                 assert(await page.locator('#f-party').inputValue()==='Distribuidora Alfa','Selecao nao refletida');
@@ -101,9 +104,33 @@ jobs:
                 await page.locator('[data-item=qty]').fill('3');
                 await page.locator('[data-item=unit]').fill('125');
                 assert(await page.locator('#f-amount').inputValue()==='375.00','Total incorreto');
+                await page.screenshot({path:'evidence/17-item-editor-open.png',animations:'disabled'});
                 await click('save');
                 assert(await page.locator('#list-results').innerText().then(x=>x.includes('375,00')),'Total nao refletido');
               });
+              await test('18-expressive-layout',async()=>{
+                await click('go:dashboard');
+                const bounds=await page.evaluate(()=>{
+                  const h=document.querySelector('.chartpanel .sectionhead h2').getBoundingClientRect();
+                  const c=document.querySelector('#chart-period').getBoundingClientRect();
+                  return {overlap:Math.max(h.left,c.left)<Math.min(h.right,c.right)&&Math.max(h.top,c.top)<Math.min(h.bottom,c.bottom),feature:!!document.querySelector('.balancefeature')};
+                });
+                assert(bounds.feature&&!bounds.overlap,'Composicao ou cabecalho do grafico incorreto');
+              });
+              await test('19-form-layout',async()=>{
+                await click('go:finance-payments');await click('edit:CP-1042');
+                const d=await page.locator('#dialog').boundingBox();
+                assert(!!d,'Janela ausente');
+                if(width===390)assert(Math.abs(d.width-width)<=2&&Math.abs(d.x)<=2,'Janela mobile nao ocupa a largura');
+                else assert(Math.abs(d.x-(width-d.width)/2)<=3,'Janela desktop desalinhada');
+              });
+              await page.evaluate(require('axe-core').source);
+              const editorViolations=await page.evaluate(async()=>{
+                const a=await axe.run('#dialog',{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});
+                return a.violations.map(v=>({id:v.id,impact:v.impact,count:v.nodes.length}));
+              });
+              rows.push({name:'axe-editor',violations:editorViolations,ok:editorViolations.length===0});
+              await click('close');
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
