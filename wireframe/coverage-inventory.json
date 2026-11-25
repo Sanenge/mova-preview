@@ -163,9 +163,19 @@
     },
     {
       "id": "warehouse",
-      "status": "pending-review",
+      "status": "partial",
       "remaining": [
-        "receipt, transfer, inventory session, custody, EPI and signature windows"
+        "Desktop and mobile visual review",
+        "Multi-item and batch operations",
+        "Order links and real signature/document exports",
+        "Comparison with original ERP"
+      ],
+      "implemented": [
+        "Eight record detail layouts",
+        "Ten operation wireflows with review and confirmation",
+        "Session-local balances, movements and reservations",
+        "Physical count and discrepancy",
+        "Acceptance identification and document metadata"
       ]
     },
     {
