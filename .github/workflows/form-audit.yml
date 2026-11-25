@@ -1,0 +1,105 @@
+name: MOVA - auditoria de formularios
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/form-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  forms:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        width: [390, 1440]
+        theme: [light, dark]
+    steps:
+      - name: Install Playwright and axe
+        run: |
+          npm install --no-audit --no-fund --ignore-scripts playwright@1.56.1 axe-core@4.10.3
+          npx playwright install --with-deps chromium
+      - name: Inspect central form schemas
+        env:
+          WIDTH: ${{ matrix.width }}
+          THEME: ${{ matrix.theme }}
+          MOVA_URL: https://sanenge.github.io/mova-preview/
+        run: |
+          mkdir -p audit
+          cat > forms.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const fs=require('node:fs');
+          const width=+process.env.WIDTH,theme=process.env.THEME;
+          const rows=[],errors=[];
+          let browser,startupError=null,schemas=[];
+          (async()=>{
+            try{
+              browser=await chromium.launch();
+              const page=await browser.newPage({viewport:{width,height:width===390?844:900},deviceScaleFactor:1,locale:'pt-BR',colorScheme:theme,isMobile:width===390,hasTouch:width===390});
+              page.on('pageerror',e=>errors.push(String(e.message).slice(0,300)));
+              const response=await page.goto(process.env.MOVA_URL,{waitUntil:'load',timeout:60000});
+              if(!response?.ok())throw Error('HTTP '+response?.status());
+              const demo=page.getByRole('button',{name:'Explorar o Mova de demonstração',exact:true});
+              await demo.waitFor({state:'visible',timeout:45000});
+              await demo.click({timeout:15000});
+              await demo.waitFor({state:'hidden',timeout:20000});
+              await page.waitForFunction(()=>document.querySelector('#authPortalHost')?.getAttribute('aria-hidden')==='true',{},{timeout:20000});
+              await page.waitForFunction(()=>typeof FormRegistry!=='undefined'&&typeof FormEngine!=='undefined',{},{timeout:20000});
+              if(await page.evaluate(()=>document.documentElement.dataset.theme)!==theme){
+                const controls=page.locator('[data-theme-toggle]');
+                const visible=controls.filter({visible:true});
+                if(await visible.count())try{await visible.first().click({timeout:2500})}catch{}
+                if(await page.evaluate(()=>document.documentElement.dataset.theme)!==theme)await controls.first().dispatchEvent('click');
+                await page.waitForFunction(t=>document.documentElement.dataset.theme===t,theme,{timeout:10000});
+              }
+              await page.addScriptTag({content:require('axe-core').source});
+              schemas=await page.evaluate(()=>Object.keys(FormRegistry.schemas));
+              console.log('SCHEMAS '+JSON.stringify(schemas));
+              for(const kind of schemas){
+                const row={kind,captured:false};
+                const before=errors.length;
+                try{
+                  await page.evaluate(k=>FormEngine.open(k),kind);
+                  const dialog=page.locator('#drawerHost.open .drawer').first();
+                  await dialog.waitFor({state:'visible',timeout:3500});
+                  await page.waitForTimeout(180);
+                  Object.assign(row,await page.evaluate(async()=>{
+                    const d=document.querySelector('#drawerHost.open .drawer');
+                    const visible=e=>!!e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden';
+                    const rect=d.getBoundingClientRect();
+                    const fields=[...d.querySelectorAll('input:not([type=hidden]),select,textarea')].filter(visible);
+                    const buttons=[...d.querySelectorAll('button')].filter(visible);
+                    const a=await axe.run(d,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']},iframes:false});
+                    return {title:d.querySelector('h1,h2,h3,.drawer-title')?.textContent?.trim()||'',theme:document.documentElement.dataset.theme,role:d.getAttribute('role'),ariaModal:d.getAttribute('aria-modal'),width:Math.round(rect.width),x:Math.round(rect.x),overflow:Math.max(0,d.scrollWidth-d.clientWidth),fieldCount:fields.length,buttonCount:buttons.length,smallTargets:buttons.filter(b=>{const r=b.getBoundingClientRect();return r.width<44||r.height<44}).map(b=>({label:b.getAttribute('aria-label')||b.textContent.trim().slice(0,40),w:Math.round(b.getBoundingClientRect().width),h:Math.round(b.getBoundingClientRect().height)})).slice(0,20),violations:a.violations.map(v=>({id:v.id,impact:v.impact,count:v.nodes.length,examples:v.nodes.slice(0,3).map(n=>n.target)})),incomplete:a.incomplete.map(v=>({id:v.id,count:v.nodes.length}))};
+                  }));
+                  await page.screenshot({path:'audit/'+kind.replace(/[^a-zA-Z0-9_-]/g,'_')+'.png',animations:'disabled',timeout:10000});
+                  row.captured=true;
+                }catch(e){row.error=String(e.message).slice(0,500)}
+                finally{
+                  try{await page.evaluate(()=>FormEngine.close({force:true}))}catch(e){row.closeError=String(e.message).slice(0,300)}
+                  row.errors=errors.slice(before);
+                  rows.push(row);
+                  console.log('FORM '+JSON.stringify(row));
+                }
+              }
+            }catch(e){startupError=String(e.message).slice(0,1000);console.error(startupError)}
+            finally{
+              if(browser)await browser.close();
+              const summary={width,theme,registered:schemas.length,attempted:rows.length,captured:rows.filter(r=>r.captured).length,withViolations:rows.filter(r=>r.violations?.length).length,withOverflow:rows.filter(r=>r.overflow>2).length,withSmallTargets:rows.filter(r=>r.smallTargets?.length).length,startupError,errors};
+              fs.writeFileSync('audit/report.json',JSON.stringify({summary,schemas,rows},null,2));
+              console.log('FORM_MATRIX '+JSON.stringify(summary));
+              if(startupError||!rows.length||summary.captured!==rows.length)process.exitCode=1;
+            }
+          })();
+          JS
+          node forms.cjs
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mova-forms-${{ matrix.width }}-${{ matrix.theme }}
+          path: audit/
+          retention-days: 7
+          if-no-files-found: error
