@@ -14,7 +14,7 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -94,11 +94,22 @@ jobs:
                 assert(await page.locator('#f-party').inputValue()==='Distribuidora Alfa','Selecao nao refletida');
                 await click('close');
               });
-              const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2]})));
+              await test('17-item-editor',async()=>{
+                await click('go:purchase-requests');await click('edit:SC-032');
+                await click('add-item');
+                await page.locator('[data-item=description]').fill('Material teste');
+                await page.locator('[data-item=qty]').fill('3');
+                await page.locator('[data-item=unit]').fill('125');
+                assert(await page.locator('#f-amount').inputValue()==='375.00','Total incorreto');
+                await click('save');
+                assert(await page.locator('#list-results').innerText().then(x=>x.includes('375,00')),'Total nao refletido');
+              });
+              const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
                   if(width===390){await click('more');await click('go:'+r.entry)}
                   else await click('go:'+r.entry);
+                  if(r.hidden&&r.group==='Financeiro')await click('go:finance-results');
                   if(r.id!==r.entry)await click('go:'+r.id);
                   const expected=r.id==='dashboard'?'Visão geral':r.id==='warehouse-overview'?'Estoque':r.title;
                   assert(await page.locator('.pagehead h1').innerText()===expected,'Pagina diferente: '+expected);
