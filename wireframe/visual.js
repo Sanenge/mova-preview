@@ -2,7 +2,7 @@
 const VisualR09=Object.freeze({
  purchaseStages:[['purchase-requests','Solicitações','cart'],['purchase-quotes','Cotações','task'],['purchase-orders','Ordens de compra','file'],['purchase-invoices','Notas fiscais','check']],
  viewSpec:{'task-center':['board','box','Quadro'],'clients':['grid','box','Cards'],'suppliers':['grid','box','Cards'],'professionals':['grid','box','Cards'],'budgets':['plan','budget','Estrutura'],'warehouse-stock':['stock','box','Materiais']},
- sectionLabels:{'purchase-requests':'Solicitações de compra','purchase-quotes':'Cotações recebidas','purchase-orders':'Ordens de compra','purchase-invoices':'Documentos fiscais','budgets':'Orçamentos por centro de custo','warehouse-stock':'Materiais em estoque'}
+ sectionLabels:{'purchase-requests':'Solicitações registradas','purchase-quotes':'Cotações recebidas','purchase-orders':'Ordens registradas','purchase-invoices':'Documentos fiscais','budgets':'Orçamentos por centro de custo','warehouse-stock':'Materiais em estoque'}
 });
 function visualPurchaseNav(){
  return '<nav class="purchase-flow" aria-label="Etapas de compras">'+VisualR09.purchaseStages.map(([id,label,icon],i)=>{
