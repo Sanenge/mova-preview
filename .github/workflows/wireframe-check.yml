@@ -45,7 +45,12 @@ jobs:
               const page=await browser.newPage({viewport:{width,height:width===390?844:900},deviceScaleFactor:1,isMobile:width===390,hasTouch:width===390,locale:'pt-BR'});
               page.on('pageerror',e=>errors.push(e.message));
               const visible=(s)=>page.locator(s).filter({visible:true}).first();
-              const click=async(a)=>visible('button[data-action='+JSON.stringify(a)+']').click({timeout:5000});
+              const click=async(a)=>{
+                const selector='button[data-action='+JSON.stringify(a)+']';
+                const inside=page.locator('#dialog[open] '+selector).filter({visible:true}).first();
+                if(await inside.count())return inside.click({timeout:5000});
+                return visible(selector).click({timeout:5000});
+              };
               const assert=(c,m)=>{if(!c)throw Error(m)};
               async function test(name,fn){
                 const row={name,ok:false};
