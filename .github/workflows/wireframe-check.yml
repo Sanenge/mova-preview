@@ -362,6 +362,36 @@ jobs:
                 if(width===390)assert(Math.abs(b.a.x-b.d.x)<=2&&b.d.y>=b.a.b&&b.a.w>300,'Gráficos mobile não empilhados: '+JSON.stringify(b));
                 else assert(b.a.w>400&&b.d.w>240,'Gráficos desktop estreitos');
               });
+              await test('49-action-zone',async()=>{
+                await click('go:finance-payments');
+                assert(await page.locator('.pageactions button[data-action="new"]:visible').count()===1,'Ação principal ausente ou duplicada');
+                if(width===390){
+                  const b=await page.evaluate(()=>{const main=document.querySelector('.main').getBoundingClientRect(),zone=document.querySelector('.action-zone').getBoundingClientRect(),nav=document.querySelector('.mobilebar').getBoundingClientRect();return {main:main.bottom,zone:zone.top,zoneBottom:zone.bottom,nav:nav.top}});
+                  assert(b.main<=b.zone+2&&b.zoneBottom<=b.nav+2,'Ordem das regiões mobile incorreta: '+JSON.stringify(b));
+                  assert(await page.locator('.action-zone .pageactions').count()===1,'Ação não está na região reservada');
+                }
+              });
+              await test('50-table-column-sort',async()=>{
+                await click('go:finance-payments');
+                if(width===1440){
+                  await click('sort-column:amount');
+                  const asc=await page.locator('th[aria-sort="ascending"] button[data-action="sort-column:amount"]').count();
+                  assert(asc===1,'Coluna ordenada não indicada');
+                  const amounts=await page.locator('tbody td.money').allTextContents();
+                  const nums=amounts.map(x=>Number(x.replace(/[^0-9,]/g,'').replace(',','.')));
+                  assert(nums.every((v,i)=>i===0||nums[i-1]<=v),'Ordenação de valores incorreta');
+                }
+              });
+              await test('51-editor-and-summary-layout',async()=>{
+                await click('go:finance-payments');await click('view:CP-1043');
+                assert(await page.locator('.summary-value strong').innerText().then(x=>x.includes('8.420,50')),'Destaque monetário ausente');
+                await click('close');await click('edit:CP-1043');
+                if(width===1440){
+                  const b=await page.evaluate(()=>{const n=document.querySelector('.editor-nav').getBoundingClientRect(),d=document.querySelector('#dialog .dialogbody').getBoundingClientRect();return {nav:n.right,body:d.left}});
+                  assert(b.nav<=b.body+2,'Índice desktop invade o editor');
+                }
+                await click('close');
+              });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
                 await test('route-'+r.id,async()=>{
