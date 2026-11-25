@@ -1,0 +1,163 @@
+{
+  "basis": "Sanenge/Mova design-system/contracts/f4-component-families.json and architecture/PHASE2_ROUTE_USECASE_DECISIONS.json; finance/purchasing/warehouse presentation",
+  "scope": "Wireframe interactions only; not certified as ERP parity.",
+  "families": {
+    "actions": {
+      "description": "Ações padronizadas e barra de ações do formulário",
+      "components": [
+        "btn",
+        "iconBtn",
+        "actionButton",
+        "actionIcon",
+        "adaptiveAction",
+        "editorActionBar",
+        "recordActionStrip",
+        "actionGroup",
+        "iconControl",
+        "actionSummary",
+        "toggleControl",
+        "toolbarButton",
+        "toolbarSelect",
+        "addItemControl"
+      ]
+    },
+    "summaries": {
+      "description": "Identidade, seções, resumo e rodapé de janelas de consulta",
+      "components": [
+        "summaryWindow",
+        "showSummary",
+        "summaryIdentity",
+        "summarySection",
+        "summaryActions",
+        "recordPreview",
+        "purchaseSummaryLayout",
+        "selectionSummary",
+        "quickViewFooter",
+        "bindSummaryEvents"
+      ]
+    },
+    "forms": {
+      "description": "Estruturas centrais de formulários e campos",
+      "components": [
+        "formGrid",
+        "formSection",
+        "formPanel",
+        "formRepeatRow",
+        "formRepeatGroup",
+        "field",
+        "select",
+        "lookupField",
+        "attachmentChoices",
+        "catalogField",
+        "commentField",
+        "ratingField",
+        "formActions",
+        "filterFields"
+      ]
+    },
+    "tables": {
+      "description": "Tabela desktop e registros expansíveis em mobile",
+      "components": [
+        "cardTable",
+        "editableCardTable",
+        "compactMobileRecord",
+        "compactRecordActions",
+        "recordRowActions"
+      ]
+    },
+    "windows": {
+      "description": "Drawer, modal e janelas com ações próprias",
+      "components": [
+        "drawer",
+        "drawerHeader",
+        "drawerHead",
+        "drawerBody",
+        "drawerFoot",
+        "editorDrawer",
+        "quickViewDialog"
+      ]
+    },
+    "navigation": {
+      "description": "Navegação e pesquisa",
+      "components": [
+        "pageHeader",
+        "recordHeader",
+        "tabs",
+        "search",
+        "hierarchyNode",
+        "sectionHead",
+        "toolbar",
+        "filterControl",
+        "listSection"
+      ]
+    },
+    "feedback": {
+      "description": "Estados, vazios, informações, indicadores",
+      "components": [
+        "badge",
+        "emptyState",
+        "infoHint",
+        "metric",
+        "icon"
+      ]
+    }
+  },
+  "packages": [
+    {
+      "id": "shared",
+      "status": "partial",
+      "implemented": [
+        "advanced filters and chips",
+        "operation states"
+      ]
+    },
+    {
+      "id": "finance",
+      "status": "partial",
+      "implemented": [
+        "dossier tabs",
+        "classification edit",
+        "local attachment reference",
+        "settlement history"
+      ],
+      "remaining": [
+        "payment plans",
+        "batch operations",
+        "reclassification and renegotiation",
+        "reversal",
+        "bank import and reconciliation",
+        "report drill-down and export"
+      ]
+    },
+    {
+      "id": "purchase",
+      "status": "partial",
+      "implemented": [
+        "record detail tabs",
+        "comments",
+        "attachment metadata"
+      ],
+      "remaining": [
+        "order wizard",
+        "supplier proposals and comparative award",
+        "receiving and returns",
+        "fiscal XML review",
+        "per-item approval"
+      ]
+    },
+    {
+      "id": "warehouse",
+      "status": "pending-review",
+      "remaining": [
+        "receipt, transfer, inventory session, custody, EPI and signature windows"
+      ]
+    },
+    {
+      "id": "other",
+      "status": "pending-review",
+      "remaining": [
+        "compare original actions and forms: budgets, registries, documents, BI, tasks, messages, learning, settings"
+      ]
+    }
+  ]
+}
