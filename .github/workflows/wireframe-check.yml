@@ -49,6 +49,7 @@ jobs:
                 const selector='button[data-action='+JSON.stringify(a)+']';
                 const inside=page.locator('dialog[open] '+selector).filter({visible:true}).last();
                 if(await inside.count())return inside.click({timeout:5000});
+                if(!await visible(selector).count()){const hidden=page.locator('.operation-overflow-r31:not([open])').filter({has:page.locator(selector)}).first();if(await hidden.count())await hidden.locator('summary').click({timeout:5000})}
                 return visible(selector).click({timeout:5000});
               };
               const assert=(c,m)=>{if(!c)throw Error(m)};
@@ -615,6 +616,16 @@ jobs:
                 await page.evaluate(()=>go('finance-payments'));
                 if(width===390){const b=await page.locator('.finance-overview').boundingBox();assert(b&&b.height<235,'Resumo financeiro ocupa espaço excessivo: '+JSON.stringify(b));}
                 await page.screenshot({path:'evidence/81-compact-finance.png',animations:'disabled'});
+              });
+              await test('82-adaptive-operation-menu',async()=>{
+                await page.evaluate(()=>go('finance-payments'));
+                const d=page.locator('.operation-toolbar-r26 .operation-overflow-r31');
+                assert(await d.count()===1,'Menu de operações ausente');
+                if(width===390){assert(await d.getAttribute('open')===null,'Menu deveria iniciar recolhido');await d.locator('summary').click();assert(await d.locator('[data-action="finance-batch"]').isVisible(),'Operação secundária inacessível');await page.screenshot({path:'evidence/82-operations-open.png',animations:'disabled'});await page.keyboard.press('Escape');assert(await d.getAttribute('open')===null,'Escape não fechou menu');}
+              });
+              await test('83-semantic-bank-summary',async()=>{
+                await page.evaluate(()=>go('finance-banks'));
+                assert(await page.locator('.semantic-summary-r31').innerText().then(t=>t.includes('Saldo registrado')&&t.includes('Contas ativas')&&!t.includes('Em aberto')),'Resumo bancário inadequado');
               });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){

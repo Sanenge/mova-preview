@@ -14,7 +14,7 @@ const whOpsR27={entry:['Entrada','warehouse-movements'],exit:['Saída','warehous
 const whTargetsR27=['fulfill','count','delivery','return'];
 const whDoneR27=x=>['Entregue','Concluído','Devolvido'].includes(x.status);
 const whQtyR27=n=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:3});
-function whToolbarR27(x){const spec=whSpecsR27[route];if(!spec)return '';return '<div class="wh-toolbar">'+spec[1].filter(k=>!x||!whTargetsR27.includes(k)||!whDoneR27(x)).map(k=>btn(whOpsR27[k][0],k==='transfer'?'arrow':'box','wh-start:'+k+(x?'|'+x.id:''))).join('')+'</div>'}
+function whToolbarR27(x){const spec=whSpecsR27[route];if(!spec)return '';return '<div class="wh-toolbar">'+actionGroupR31(spec[1].filter(k=>!x||!whTargetsR27.includes(k)||!whDoneR27(x)).map(k=>({label:whOpsR27[k][0],icon:k==='transfer'?'arrow':'box',action:'wh-start:'+k+(x?'|'+x.id:'')})))+'</div>'}
 function whSummaryR27(x){return whSpecsR27[route]?btn('Acompanhar registro','arrow','wh-page:'+x.id,'tonal'):''}
 function whOpenR27(id){if(!whSpecsR27[route]||!records[route]?.some(x=>x.id===id))return;closeDialog({all:true});warehousePageR27={r:route,id,tab:whSpecsR27[route][0][0]};render();$('.main')?.scrollTo(0,0);window.scrollTo(0,0)}
 function whPaneR27(p,x){const cfg=routes[p.r],t=p.tab;

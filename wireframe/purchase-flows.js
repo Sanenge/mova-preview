@@ -1,5 +1,5 @@
 /* R24: purchase operation prototypes. All records are session-only. */
-const BUILD_R24='R30';
+const BUILD_R24='R31';
 let purchaseFlowR24=null;
 const purchaseNoteR24='<p class="muted">Simulação com dados fictícios. Nenhuma ordem, comunicação ou documento fiscal real é enviado.</p>';
 const purchaseItemsR24=x=>(x.items?.length?x.items:[{description:x.description,qty:1,unit:x.amount}]).map(i=>({...i}));
@@ -45,4 +45,4 @@ const operationRegistryR26=Object.freeze({
  'purchase-orders':[['Nova ordem por origem','plus','purchase-wizard'],['Registrar recebimento','box','purchase-pick:receipt'],['Registrar devolução','arrow','purchase-pick:return']],
  'purchase-invoices':[['Importar XML','file','purchase-xml'],['Conferir nota fiscal','check','purchase-pick:invoice']]
 });
-function operationToolbarR26(){const actions=operationRegistryR26[route];if(!actions)return '';return '<div class="operation-toolbar-r26" role="group" aria-label="Operações disponíveis">'+actions.map(([l,i,k])=>btn(l,i,k,'ghost')).join('')+'</div>'}
+function operationToolbarR26(){const actions=operationRegistryR26[route];if(!actions)return '';return '<div class="operation-toolbar-r26" role="group" aria-label="Operações disponíveis">'+actionGroupR31(actions.map(([l,i,k])=>({label:l,icon:i,action:k})))+'</div>'}
