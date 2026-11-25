@@ -1,7 +1,7 @@
 name: MOVA - homologacao do novo wireframe
 on:
   push:
-    branches: [main]
+    branches: [main, wireframe-r16]
     paths:
       - wireframe/**
       - .github/workflows/wireframe-check.yml
@@ -9,7 +9,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: mova-wireframe-check
+  group: mova-wireframe-check-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   test:
@@ -424,6 +424,23 @@ jobs:
                 assert(await page.locator('.settings-group').count()===1,'Pesquisa de configurações incorreta');
                 await page.locator('#settings-search').fill('');
                 assert(await page.locator('.settings-group').count()===3,'Agrupamentos ausentes');
+              });
+              await test('57-view-focus',async()=>{
+                await click('go:finance-payments');
+                const density=page.locator('button[data-action="density"]').filter({visible:true});
+                if(width===1440){
+                  await density.click();
+                  assert(await page.evaluate(()=>document.activeElement?.dataset.action)==='density','Foco perdido ao alternar densidade');
+                  assert(await density.getAttribute('aria-pressed')!==null,'Densidade sem estado');
+                }
+                await click('view:CP-1043');await click('close');
+                assert(await page.evaluate(()=>document.activeElement?.dataset.action)==='view:CP-1043','Foco não retornou ao registro');
+              });
+              await test('58-search-accent',async()=>{
+                await click('go:finance-payments');
+                await page.locator('#list-search').fill('HORIZONTE');
+                assert(await page.locator('#list-results').innerText().then(x=>x.includes('Horizonte')),'Busca insensível a caixa falhou');
+                await page.locator('#list-search').fill('');
               });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
