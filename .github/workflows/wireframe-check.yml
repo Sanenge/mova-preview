@@ -63,7 +63,7 @@ jobs:
                   row.clippedValues=await page.evaluate(()=>[...document.querySelectorAll('.metric,.balancevalue,.recordcard .money,td.money')].filter(e=>e.getClientRects().length&&e.scrollWidth>e.clientWidth+2).map(e=>e.textContent.trim()));
                   assert(row.clippedValues.length===0,'Valores cortados: '+row.clippedValues.join(', '));
                   row.ok=true;
-                }catch(e){row.error=e.message.slice(0,700);try{await page.screenshot({path:'evidence/'+name+'-failed.png'})}catch{}}
+                }catch(e){row.error=e.message.slice(0,700);try{await page.screenshot({path:'evidence/'+name+'-failed.png'})}catch{};await page.evaluate(()=>{document.querySelectorAll('dialog[open]').forEach(d=>d.close());if(typeof closeDialog==='function')closeDialog()}).catch(()=>{});}
                 rows.push(row);console.log('CHECK '+JSON.stringify(row));
               }
               await page.goto('http://127.0.0.1:8765/wireframe/',{waitUntil:'load'});
@@ -239,8 +239,8 @@ jobs:
                 await click('form-section:3');
                 await page.waitForTimeout(550);
                 const pos=await page.evaluate(()=>{const e=document.querySelector('#editor-section-3').getBoundingClientRect(),n=document.querySelector('.editor-nav').getBoundingClientRect();return {top:e.top,nav:n.bottom,bottom:e.bottom}});
-                assert(pos.bottom>pos.nav&&pos.top<pos.nav+150,'Seção não foi localizada');
                 await click('close');
+                assert(pos.bottom>pos.nav&&pos.top<pos.nav+150,'Seção não foi localizada');
               });
               await test('34-record-identity-layout',async()=>{
                 await click('go:finance-payments');
@@ -284,6 +284,42 @@ jobs:
                 assert(await page.locator('.material-card').count()===3,'Cards de materiais ausentes');
                 await click('view-mode:list');assert(await page.locator('.tablewrap').count()===1,'Lista de estoque ausente');
                 await click('view-mode:stock');
+              });
+              async function flatSurface(selector){
+                const failures=await page.evaluate(sel=>[...document.querySelectorAll(sel)].filter(e=>e.getClientRects().length).filter(e=>{const c=getComputedStyle(e);return c.backgroundColor!=='rgba(0, 0, 0, 0)'||c.boxShadow!=='none'||c.borderTopWidth!=='0px'}).map(e=>e.className),selector);
+                assert(failures.length===0,'Superfícies aninhadas: '+failures.join(', '));
+              }
+              await test('39-flat-dashboard',async()=>{
+                await click('go:dashboard');
+                assert(await page.locator('.panel .workitem').count()>0,'Agrupamento ausente');
+                await flatSurface('.panel .workitem,.panel .recent-item');
+              });
+              await test('40-flat-editor',async()=>{
+                await click('go:finance-payments');await click('edit:CP-1043');
+                await flatSurface('#dialog .domain-section');
+                assert(await page.locator('#dialog .editor-nav').count()===1,'Índice ausente');
+                assert(await page.locator('#dialog .dialogbody .editor-nav').count()===0,'Índice dentro da rolagem');
+                await click('close');
+              });
+              await test('41-flat-summary',async()=>{
+                await click('go:finance-payments');await click('view:CP-1043');
+                await flatSurface('.summary-content .summary,.summary-content .historyline');
+                assert(await page.locator('.summary-identity').count()===1,'Identidade do resumo ausente');
+                await click('close');
+              });
+              await test('42-flat-budget-and-stock',async()=>{
+                await module('budgets');
+                await flatSurface('.budget-card .budget-total');
+                const card=page.locator('.budget-card').filter({hasText:'OR-012'});
+                await card.locator('.budget-details>summary').click();
+                await card.locator('.budget-stage>summary').first().click();
+                await flatSurface('.budget-card .budget-stage,.budget-card .budget-leaf');
+                await module('warehouse-overview');await flatSurface('.panel .location-card,.panel .linktile');
+                await click('go:warehouse-stock');await flatSurface('.material-card .material-quantity');
+              });
+              await test('43-flat-board-and-settings',async()=>{
+                await module('task-center');await flatSurface('.board-column');
+                await module('settings-home');await flatSurface('.panel .linktile');
               });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
