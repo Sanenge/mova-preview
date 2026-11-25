@@ -334,10 +334,12 @@ jobs:
                 assert(await page.locator('.analysis-line').count()===2,'Curvas financeiras ausentes');
                 await page.locator('.analysis-target').first().focus();
                 assert(await page.locator('#analysis-revenue').innerText().then(x=>x.includes('68.000,00')),'Leitura do mês incorreta');
+                await page.locator('button[data-action="chart-mode:bars"]').evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest'}));
                 await click('chart-mode:bars');
                 assert(await page.locator('.analysis-bar').count()===12,'Colunas ausentes');
                 await page.locator('#chart-period').selectOption('3');
                 assert(await page.locator('.analysis-target').count()===3,'Período incorreto');
+                await page.locator('button[data-action="chart-mode:area"]').evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest'}));
                 await click('chart-mode:area');
                 assert(await page.locator('.analysis-line').count()===2,'Retorno à visualização de linhas ausente');
               });
@@ -345,6 +347,20 @@ jobs:
                 await click('go:dashboard');
                 const values=await page.evaluate(()=>['.pagehead h1','.balancevalue','.metric-heading'].map(s=>Number(getComputedStyle(document.querySelector(s)).fontWeight)));
                 assert(values.every(v=>v<=600),'Peso tipográfico acima da escala: '+values.join(','));
+              });
+              await test('47-navigation-search',async()=>{
+                await click('go:dashboard');
+                await click('navigation-search');
+                await page.locator('#module-search').fill('conciliacao');
+                assert(await page.locator('#nav-results .nav-result').count()===1,'Pesquisa sem acento não encontrou a rota');
+                await page.locator('#module-search').press('Enter');
+                assert(await page.locator('.pagehead h1').innerText()==='Extratos e conciliação','Pesquisa não navegou');
+              });
+              await test('48-responsive-insights',async()=>{
+                await click('go:dashboard');
+                const b=await page.evaluate(()=>{const a=document.querySelector('.analysis-panel').getBoundingClientRect(),d=document.querySelector('.distribution-panel').getBoundingClientRect(),c=document.querySelector('.content').getBoundingClientRect();return {a:{x:a.x,y:a.y,w:a.width,b:a.bottom},d:{x:d.x,y:d.y,w:d.width},content:c.width}});
+                if(width===390)assert(Math.abs(b.a.x-b.d.x)<=2&&b.d.y>=b.a.b&&b.a.w>300,'Gráficos mobile não empilhados: '+JSON.stringify(b));
+                else assert(b.a.w>400&&b.d.w>240,'Gráficos desktop estreitos');
               });
               const inventory=await page.evaluate(()=>Object.entries(routes).map(([id,r])=>({id,title:r.title,group:r.group,entry:groups.find(g=>g[0]===r.group)?.[2],hidden:hiddenRoutes.has(id)})));
               for(const r of inventory){
