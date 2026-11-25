@@ -1,7 +1,7 @@
-name: MOVA - auditoria visual responsiva R16
+name: MOVA - auditoria visual responsiva R17
 on:
   push:
-    branches: [wireframe-r16]
+    branches: [wireframe-r16, wireframe-r17]
   workflow_dispatch:
 permissions:
   contents: read
@@ -33,13 +33,13 @@ jobs:
           page.on('pageerror',e=>errors.push(e.message));
           await page.goto('http://127.0.0.1:8765/wireframe/');if(theme==='dark')await page.locator('[data-action=theme]:visible').first().click();await page.locator('[data-action=login]').click();
           const ids=await page.evaluate(()=>Object.keys(routes));
-          for(const id of ids){await page.evaluate(id=>go(id),id);await page.waitForTimeout(80);const row=await page.evaluate(id=>({id,title:document.querySelector('h1')?.textContent,overflow:Math.max(0,document.documentElement.scrollWidth-innerWidth),clipped:[...document.querySelectorAll('.metric,.balancevalue,.recordcard .money,td.money')].filter(e=>e.getClientRects().length&&e.scrollWidth>e.clientWidth+2).map(e=>e.textContent.trim())}),id);rows.push(row);await page.screenshot({path:'evidence/'+id+'.png',animations:'disabled'});}
-          }finally{await browser.close();fs.writeFileSync('evidence/report.json',JSON.stringify({width,theme,rows,errors},null,2));console.log('VISUAL '+JSON.stringify({width,theme,captured:rows.length,overflow:rows.filter(r=>r.overflow>2).length,clipped:rows.filter(r=>r.clipped.length).length,errors}));if(rows.length!==66||errors.length||rows.some(r=>r.overflow>2||r.clipped.length))process.exitCode=1}})().catch(e=>{console.error(e);process.exitCode=1});
+          for(const id of ids){await page.evaluate(id=>go(id),id);await page.waitForTimeout(80);const row=await page.evaluate(id=>({id,title:document.querySelector('h1')?.textContent,overflow:Math.max(0,document.documentElement.scrollWidth-innerWidth),badTable:[...document.querySelectorAll('.table-identity strong')].filter(e=>e.getClientRects().length&&e.clientWidth<90).map(e=>e.textContent),clipped:[...document.querySelectorAll('.metric,.balancevalue,.recordcard .money,td.money')].filter(e=>e.getClientRects().length&&e.scrollWidth>e.clientWidth+2).map(e=>e.textContent.trim())}),id);rows.push(row);await page.screenshot({path:'evidence/'+id+'.png',animations:'disabled'});}
+          }finally{await browser.close();fs.writeFileSync('evidence/report.json',JSON.stringify({width,theme,rows,errors},null,2));console.log('VISUAL '+JSON.stringify({width,theme,captured:rows.length,overflow:rows.filter(r=>r.overflow>2).length,clipped:rows.filter(r=>r.clipped.length).length,badTable:rows.filter(r=>r.badTable.length).length,errors}));if(rows.length!==66||errors.length||rows.some(r=>r.overflow>2||r.clipped.length||r.badTable.length))process.exitCode=1}})().catch(e=>{console.error(e);process.exitCode=1});
           JS
           node visual.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: visual-r16-${{ matrix.width }}-${{ matrix.theme }}
+          name: visual-r17-${{ matrix.width }}-${{ matrix.theme }}
           path: evidence/
           retention-days: 7

@@ -1,7 +1,7 @@
 name: MOVA - homologacao do novo wireframe
 on:
   push:
-    branches: [main, wireframe-r16]
+    branches: [main, wireframe-r16, wireframe-r17]
     paths:
       - wireframe/**
       - .github/workflows/wireframe-check.yml

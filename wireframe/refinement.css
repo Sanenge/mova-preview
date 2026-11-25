@@ -97,3 +97,62 @@ button[data-action]:active:not(:disabled){transform:scale(.975)}
 @media(max-width:800px){.dialog[open] .dialoghead h2{font-size:23px}.dialogfooter .btn{min-height:50px}.recordcard .actions .btn{min-height:44px}.lookup-choice{min-height:60px;padding:9px 5px}.toolbar .search input{font-size:15px}.cash-movement-value{max-width:48%}.cash-movement-value strong{font-size:clamp(12px,3.5vw,14px)}.mobilebar button.active .navicon{border-radius:15px}.main{overscroll-behavior-y:contain}}
 @media(max-width:360px){.top{padding-inline:12px}.topactions .iconbtn{width:36px;min-height:40px}.content{padding-inline:12px}.finance-total>.metric,.cash-main-value .metric,.report-summary>div:first-child .metric{font-size:30px}.finance-breakdown-head .metric,.cash-mini .metric,.report-summary .metric{font-size:18px}.dashboard-metric .metric{font-size:16px}.recordcard .actions .btn{font-size:12px;gap:3px}.recordcard .actions .btn .icon{width:15px}.toolbar{gap:5px}.toolbar .filter{max-width:128px}.toolbar .iconbtn{width:40px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}button[data-action]:active:not(:disabled),.recordcard:hover,.contact-card:hover,.budget-card:hover,.material-card:hover,.task-card:hover{transform:none!important}}
+
+/* R17 — responsive density follows available workspace, not just device name. */
+.tablewrap table{table-layout:fixed;min-width:1040px;width:100%;border-collapse:separate;border-spacing:0}
+.tablewrap table.table-text{min-width:900px}
+.tablewrap .col-code{width:95px}.tablewrap .col-party{width:21%}.tablewrap .col-description{width:auto}.tablewrap .col-date{width:110px}.tablewrap .col-amount{width:138px}.tablewrap .col-status{width:112px}.tablewrap .col-actions{width:172px}
+.tablewrap .compact .col-actions{width:140px}.tablewrap .compact .col-party{width:22%}
+.tablewrap td,.tablewrap th{padding-inline:12px;overflow-wrap:normal;word-break:normal}
+.tablewrap .table-identity strong{overflow-wrap:break-word;word-break:normal;min-width:0}
+.tablewrap td.money{white-space:nowrap;overflow:visible;text-overflow:clip}
+.tablewrap td.actions{white-space:nowrap;text-align:right;position:static}
+.tablewrap th:last-child{position:static;text-align:right}
+.tablewrap td.actions .iconbtn{margin-right:0;width:36px;min-height:40px}
+.tablewrap td.actions .btn{padding-inline:10px;min-height:40px}
+.tablewrap td.actions .btn .icon{width:16px}
+.tablewrap .table-footer{position:sticky;left:0;width:100%;min-width:0}
+.top .nav-search>span:nth-child(2){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.company .avatar{display:grid;place-items:center;flex:none}
+@media(min-width:801px) and (max-width:1199px){
+ .tablewrap{background:transparent;overflow:visible;border-radius:0}
+ .tablewrap table{display:none!important}.tablewrap .cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .tablewrap .recordcard{display:flex;flex-direction:column;min-width:0;min-height:205px;padding:15px;border-radius:21px;gap:10px}
+ .tablewrap .recordcard .actions{margin-top:auto;display:flex;gap:6px;align-items:center}
+ .tablewrap .recordcard .actions .btn{flex:1;min-width:0;font-size:13px;padding-inline:8px;gap:4px}
+ .tablewrap .recordcard .actions .btn .icon{width:16px}.tablewrap .recordcard .actions .iconbtn{flex:none}
+ .tablewrap .record-name strong{font-size:15px;overflow-wrap:break-word}.tablewrap .recordcard .money{font-size:21px}
+ .tablewrap .recordcard .row{flex-wrap:wrap;gap:6px}.tablewrap .recordcard .tag{font-size:12px}
+ .tablewrap .table-footer{background:transparent;padding:14px 0}
+ .toolbar [data-action=density]{display:none!important}.toolbar [data-action=sort]{display:inline-grid!important}
+ .contexttrail{max-width:190px}.top .nav-search{min-width:168px;max-width:240px}
+}
+@media(min-width:600px) and (max-width:800px){
+ .content{padding-inline:24px}.pagehead h1{font-size:38px}
+ .overview-grid{grid-template-columns:1.3fr 1fr 1fr;gap:10px;align-items:stretch}
+ .overview-grid>.balancefeature{grid-column:auto;min-height:180px;padding:16px}
+ .experience-dashboard .balancevalue{font-size:25px;letter-spacing:-.9px}
+ .dashboard-metric{padding:13px;justify-content:space-between}.dashboard-metric .metric{font-size:20px}
+ .dashboard-metric .metric-heading{flex-direction:row;align-items:center}.balancebottom .btn{margin-left:0}
+ .insights-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)!important}
+ .activity-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .analysis-panel .sectionhead h2{font-size:18px}.analysis-readout strong{font-size:16px}
+ .analysis-controls{flex-wrap:wrap}.analysis-controls #chart-period{margin-left:0}
+ .analysis-svg-wrap,.analysis-axis{height:174px}
+ .tablewrap .cards,.contacts-grid,.material-grid,.budget-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .tablewrap .recordcard{min-height:200px;display:flex;flex-direction:column}.tablewrap .recordcard .actions{margin-top:auto}
+ .task-board{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .purchase-flow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}
+ .purchase-step{min-height:64px}.purchase-stats{display:grid;grid-template-columns:1.2fr 1fr 1fr;overflow:visible}
+ .purchase-stat{padding:13px;flex-direction:column;align-items:flex-start;gap:6px}.purchase-stat .metric{font-size:21px}
+ .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-right:0;padding-right:0;overflow:visible}
+ .kpis .kpi .metric{font-size:21px}
+ .settings-group-links{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
+ .stock-workspace{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .stock-resources .tilegrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .cash-summary,.report-summary{grid-template-columns:1.3fr 1fr 1fr}.cash-main-value,.report-summary>div:first-child{grid-column:auto}
+ .cash-main-value .metric,.report-summary>div:first-child .metric{font-size:26px}
+ .dialog[data-mode=editor] .domain-section>.formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(min-width:1200px) and (max-width:1399px){.tablewrap table{min-width:1040px}.tablewrap .col-party{width:20%}}
+@media(min-width:1400px){.tablewrap table{min-width:1040px}.tablewrap .col-party{width:20%}}
